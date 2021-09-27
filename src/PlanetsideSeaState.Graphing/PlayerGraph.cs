@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PlanetsideSeaState.MapActivityGraph
+namespace PlanetsideSeaState.Graphing
 {
     public class PlayerGraph
     {

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PlanetsideSeaState.MapActivityGraph
+namespace PlanetsideSeaState.Graphing
 {
     public class PlayerEdge
     {

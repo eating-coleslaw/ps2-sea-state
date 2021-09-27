@@ -5,25 +5,35 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PlanetsideSeaState.MapActivityGraph
+namespace PlanetsideSeaState.Graphing
 {
     public class PlayerNode
     {
-        public readonly string CharacterId;
-        public readonly int FactionId;
+        public string Id { get; }
+        public int FactionId { get; }
+        public string Name { get; }
 
-        public int WorldId { get; set; }
+        public int ZoneId { get; set; }
+        public DateTime LastSeen { get; private set; }
 
         private List<PlayerEdge> Edges { get; set; } = new();
         public IReadOnlyList<PlayerEdge> ReadOnlyEdges { get => Edges; }
-
         public int EdgesCount { get => Edges.Count; }
 
-        public PlayerNode(Character character, int worldId)
+
+        public PlayerNode(Character character, DateTime lastSeen, int zoneId)
         {
-            CharacterId = character.Id;
+            Id = character.Id;
             FactionId = character.FactionId;
-            WorldId = worldId;
+            Name = character.Name;
+            LastSeen = lastSeen;
+            ZoneId = zoneId;
+        }
+
+        public void UpdateLocation(int zoneId, DateTime timestamp)
+        {
+            ZoneId = zoneId;
+            LastSeen = timestamp;
         }
 
         public void AddEdge(PlayerNode childNode, DateTime timestamp)
