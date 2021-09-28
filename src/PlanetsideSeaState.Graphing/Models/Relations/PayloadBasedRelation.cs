@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PlanetsideSeaState.Graphing
+namespace PlanetsideSeaState.Graphing.Models.Relations
 {
     public class PayloadBasedRelation
     {

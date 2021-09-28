@@ -1,4 +1,6 @@
-﻿using System;
+﻿using PlanetsideSeaState.App.CensusStream.Models;
+using PlanetsideSeaState.Graphing.Models.Events;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +14,10 @@ namespace PlanetsideSeaState.Graphing
         public readonly PlayerNode Parent;
         public readonly PlayerNode Child;
 
-        public DateTime Timestamp { get; set; }
+        public DateTime LastUpdate { get; set; }
+        public int? ZoneId { get; private set; }
+        public PayloadEventType EventType { get; private set; }
+        public int? ExperienceId { get; private set; }
 
         // Max time, in milliseconds, before the edge expires
         public int Lifetime { get; private set; }
@@ -21,17 +26,85 @@ namespace PlanetsideSeaState.Graphing
 
         private bool _isExpiring = false;
 
+        private readonly AutoResetEvent _autoEvent = new(true);
 
-        public PlayerEdge(PlayerNode parent, PlayerNode child, DateTime timestamp, int lifetimeMinutes = 5)
+        public PlayerEdge(PlayerNode parent, PlayerNode child, PlayerRelationEvent relationEvent, int lifetimeMinutes = 5)
         {
             Parent = parent;
             Child = child;
-            Timestamp = timestamp;
+            LastUpdate = relationEvent.Timestamp;
+            EventType = relationEvent.EventType;
+            ExperienceId = relationEvent.ExperienceId;
+            ZoneId = relationEvent.ZoneId;
             Lifetime = lifetimeMinutes * 60 * 1000;
 
             ExpirationTimer = new Timer(OnExpirationReached, null, Lifetime, System.Threading.Timeout.Infinite);
         }
 
+        public PlayerEdge(PlayerNode parent, PlayerNode child, DateTime timestamp, PayloadEventType eventType, int zoneId, int? experienceId, int lifetimeMinutes = 5)
+        {
+            Parent = parent;
+            Child = child;
+            LastUpdate = timestamp;
+            EventType = eventType;
+            ExperienceId = experienceId;
+            ZoneId = zoneId;
+            Lifetime = lifetimeMinutes * 60 * 1000;
+
+            ExpirationTimer = new Timer(OnExpirationReached, null, Lifetime, System.Threading.Timeout.Infinite);
+        }
+
+        public bool TryUpdate(PlayerRelationEvent relationEvent)
+        {
+            if (_isExpiring)
+            {
+                return false;
+            }
+
+            _autoEvent.WaitOne();
+
+            if (LastUpdate >= relationEvent.Timestamp)
+            {
+                _autoEvent.Set();
+                return false;
+            }
+
+            LastUpdate = relationEvent.Timestamp;
+            EventType = relationEvent.EventType;
+            ZoneId = relationEvent.ZoneId;
+            ExperienceId = relationEvent.ExperienceId;
+
+            _autoEvent.Set();
+
+            return true;
+        }
+
+        public bool TryUpdate(DateTime timestamp, PayloadEventType eventType, int zoneId, int? experienceId)
+        {
+            if (_isExpiring)
+            {
+                return false;
+            }
+            
+            _autoEvent.WaitOne();
+
+            if (LastUpdate >= timestamp)
+            {
+                _autoEvent.Set();
+                return false;
+            }
+
+            LastUpdate = timestamp;
+            EventType = eventType;
+            ZoneId = zoneId;
+            ExperienceId = experienceId;
+
+            _autoEvent.Set();
+
+            return true;
+        }
+
+        // TODO: delete this
         public bool TryUpdateTimestamp(DateTime timestamp)
         {
             if (_isExpiring)
@@ -39,12 +112,12 @@ namespace PlanetsideSeaState.Graphing
                 return false;
             }
 
-            if (timestamp <= Timestamp)
+            if (timestamp <= LastUpdate)
             {
                 return false;
             }
 
-            Timestamp = timestamp;
+            LastUpdate = timestamp;
             ExpirationTimer.Change(Lifetime, Timeout.Infinite);
 
             return true;

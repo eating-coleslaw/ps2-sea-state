@@ -31,6 +31,7 @@ namespace PlanetsideSeaState.Graphing.Models.Relations
 
             if (LastUpdate > timestamp)
             {
+                _autoEvent.Set();
                 return false;
             }
 
