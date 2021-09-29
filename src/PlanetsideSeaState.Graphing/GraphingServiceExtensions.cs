@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using PlanetsideSeaState.Graphing.Services;
+using PlanetsideSeaState.Graphing.Services.FacilityPopsGraph;
 
 namespace PlanetsideSeaState.Graphing
 {

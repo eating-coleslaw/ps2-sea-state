@@ -11,7 +11,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PlanetsideSeaState.Graphing.Services
+namespace PlanetsideSeaState.Graphing.Services.FacilityPopsGraph
 {
     public class FacilityPopGraphService : StatefulService, IDisposable
     {

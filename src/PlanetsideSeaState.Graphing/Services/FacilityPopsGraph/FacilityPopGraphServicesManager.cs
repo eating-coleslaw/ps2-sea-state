@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using PlanetsideSeaState.App;
 using PlanetsideSeaState.Graphing.Models;
-using PlanetsideSeaState.Graphing.Services;
 using PlanetsideSeaState.Shared;
 using System;
 using System.Collections.Concurrent;
@@ -11,7 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PlanetsideSeaState.Graphing.Services
+namespace PlanetsideSeaState.Graphing.Services.FacilityPopsGraph
 {
     public class FacilityPopGraphServicesManager : StatefulHostedService, IFacilityPopGraphServicesManager
     {

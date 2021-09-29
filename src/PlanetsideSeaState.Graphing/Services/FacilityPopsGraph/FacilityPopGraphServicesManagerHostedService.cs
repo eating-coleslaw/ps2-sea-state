@@ -1,9 +1,8 @@
 ﻿using Microsoft.Extensions.Hosting;
-using PlanetsideSeaState.Graphing.Services;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PlanetsideSeaState.Graphing.Services
+namespace PlanetsideSeaState.Graphing.Services.FacilityPopsGraph
 {
     public class FacilityPopGraphServicesManagerHostedService : IHostedService
     {

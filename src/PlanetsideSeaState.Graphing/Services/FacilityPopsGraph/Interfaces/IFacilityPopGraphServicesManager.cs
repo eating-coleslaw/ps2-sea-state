@@ -1,7 +1,7 @@
 ﻿using PlanetsideSeaState.App;
 using System.Threading.Tasks;
 
-namespace PlanetsideSeaState.Graphing.Services
+namespace PlanetsideSeaState.Graphing.Services.FacilityPopsGraph
 {
     public interface IFacilityPopGraphServicesManager : IStatefulHostedService
     {

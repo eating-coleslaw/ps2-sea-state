@@ -1,11 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using PlanetsideSeaState.Graphing.Models;
-using PlanetsideSeaState.Graphing.Services;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PlanetsideSeaState.Graphing.Services
+namespace PlanetsideSeaState.Graphing.Services.FacilityPopsGraph
 {
     public class FacilityPopGraphServiceHelper : IFacilityPopGraphServiceHelper
     {
