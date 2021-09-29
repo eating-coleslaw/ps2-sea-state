@@ -1,11 +1,13 @@
 ﻿using PlanetsideSeaState.Graphing.Exceptions;
 using PlanetsideSeaState.Graphing.Models.Events;
+using PlanetsideSeaState.Graphing.Models.Nodes;
 using PlanetsideSeaState.Shared;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PlanetsideSeaState.Graphing.Models
@@ -34,7 +36,6 @@ namespace PlanetsideSeaState.Graphing.Models
             using (await _keyedSemaphore.WaitAsync($"{playerNode.Id}"))
             {
                 var edgesSet = new HashSet<PlayerEdge>();
-
                 if (NeighboringConnections.TryAdd(playerNode, edgesSet))
                 {
                     PlayerCount++;
@@ -50,6 +51,11 @@ namespace PlanetsideSeaState.Graphing.Models
             using (await _keyedSemaphore.WaitAsync($"{playerNode.Id}"))
             {
                 var playerId = playerNode.Id;
+
+                if (!NeighboringConnections.ContainsKey(playerNode))
+                {
+                    return;
+                }
 
                 if (NeighboringConnections.TryRemove(playerNode, out var _))
                 {

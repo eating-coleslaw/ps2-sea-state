@@ -1,5 +1,6 @@
 ﻿using PlanetsideSeaState.Graphing.Exceptions;
 using PlanetsideSeaState.Graphing.Models.Events;
+using PlanetsideSeaState.Graphing.Models.Nodes;
 using PlanetsideSeaState.Graphing.Models.Relations;
 using PlanetsideSeaState.Shared;
 using System;
