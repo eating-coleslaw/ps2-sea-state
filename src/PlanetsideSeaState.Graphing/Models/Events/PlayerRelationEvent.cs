@@ -41,7 +41,7 @@ namespace PlanetsideSeaState.Graphing.Models.Events
             ActingCharacter = destruction.AttackerCharacter;
             RecipientCharacter = destruction.VictimCharacter;
             Timestamp = destruction.Timestamp;
-            EventType = PayloadEventType.Death;
+            EventType = PayloadEventType.VehicleDestroy;
             ZoneId = destruction.ZoneId;
             WorldId = destruction.WorldId;
         }

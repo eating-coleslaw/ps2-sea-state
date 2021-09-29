@@ -19,6 +19,8 @@ namespace PlanetsideSeaState.Graphing.Models.Nodes
         public DateTime LastSeen { get; private set; }
 
         private ConcurrentDictionary<PlayerNode, PlayerEdge> NeighboringRelations { get; set; } = new();
+
+        // TODO: don't make these publicly accessible / remove them
         public ICollection<PlayerNode> Neighbors => NeighboringRelations.Keys;
         public ICollection<PlayerEdge> Connections => NeighboringRelations.Values;
 

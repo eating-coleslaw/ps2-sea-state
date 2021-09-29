@@ -69,13 +69,13 @@ namespace PlanetsideSeaState.Graphing.Services.PlayersGraph
             if (!PlayerNodesMap.TryGetValue(relationEvent.ActingCharacter.Id, out PlayerNode actingNode))
             {
                 actingNode = new PlayerNode(relationEvent.ActingCharacter, relationEvent.Timestamp, relationEvent.ZoneId.Value);
-                addNodesTasks.Add(PlayersGraph.AddNode(actingNode));
+                addNodesTasks.Add(PlayersGraph.AddNodeAsync(actingNode));
             }
 
             if (!PlayerNodesMap.TryGetValue(relationEvent.RecipientCharacter.Id, out PlayerNode recipientNode))
             {
                 recipientNode = new PlayerNode(relationEvent.RecipientCharacter, relationEvent.Timestamp, relationEvent.ZoneId.Value);
-                addNodesTasks.Add(PlayersGraph.AddNode(recipientNode));
+                addNodesTasks.Add(PlayersGraph.AddNodeAsync(recipientNode));
             }
 
             if (addNodesTasks.Any())
@@ -83,7 +83,7 @@ namespace PlanetsideSeaState.Graphing.Services.PlayersGraph
                 await Task.WhenAll(addNodesTasks);
             }
 
-            await PlayersGraph.AddOrUpdateRelation(actingNode, recipientNode, relationEvent);
+            await PlayersGraph.AddOrUpdateRelationAsync(actingNode, recipientNode, relationEvent);
         }
 
         public async Task ProcessUpdatesQueue()
