@@ -33,6 +33,8 @@ namespace PlanetsideSeaState.Data
                 }),
                 options.PoolSize);
 
+            services.AddSingleton<IDbHelper, DbHelper>();
+
             services.AddSingleton<IDbContextHelper, DbContextHelper>();
             services.AddSingleton<IUpdaterSchedulerRepository, UpdaterSchedulerRepository>();
             
