@@ -27,7 +27,7 @@ namespace PlanetsideSeaState.CensusStore.Services
         }
 
         // Credit to Lampjaw
-        public async Task<Dictionary<int, int>> GetMapOwnershipAsync(int worldId, int zoneId)
+        public async Task<Dictionary<int, short>> GetMapOwnershipAsync(short worldId, uint zoneId)
         {
             var map = await _censusFacility.GetMapOwnership(worldId, zoneId);
             return map?.Regions.Row.ToDictionary(a => a.RowData.RegionId, a => a.RowData.FactionId);
@@ -43,12 +43,12 @@ namespace PlanetsideSeaState.CensusStore.Services
             return await _facilityRepository.GetMapRegionsByFacilityTypeAsync(facilityTypeId);
         }
 
-        public async Task<IEnumerable<MapRegion>> GetMapRegionsByZoneIdAsync(int zoneId)
+        public async Task<IEnumerable<MapRegion>> GetMapRegionsByZoneIdAsync(uint zoneId)
         {
             return await _facilityRepository.GetMapRegionsByZoneIdAsync(zoneId);
         }
 
-        public async Task<IEnumerable<FacilityLink>> GetFacilityLinksByZoneIdAsync(int zoneId)
+        public async Task<IEnumerable<FacilityLink>> GetFacilityLinksByZoneIdAsync(uint zoneId)
         {
             return await _facilityRepository.GetFacilityLinksByZoneIdAsync(zoneId);
         }

@@ -8,6 +8,6 @@ namespace PlanetsideSeaState.CensusServices.Models
         public string OutfitId { get; set; }
         public DateTime MemberSinceDate { get; set; }
         public string Rank { get; set; }
-        public int RankOrdinal { get; set; }
+        public short RankOrdinal { get; set; }
     }
 }

@@ -15,17 +15,12 @@ namespace PlanetsideSeaState.Data.Models.Census
         public string OutfitAlias { get; set; } = string.Empty;
         public string OutfitAliasLower { get; set; } = string.Empty;
 
-        public int FactionId { get; set; }
-        public int TitleId { get; set; }
-        public int WorldId { get; set; }
-        public int BattleRank { get; set; }
-        public int BattleRankPercentToNext { get; set; }
-        public int CertsEarned { get; set; }
-        public int PrestigeLevel { get; set; }
+        public short FactionId { get; set; }
+        public short WorldId { get; set; }
+        public short BattleRank { get; set; }
+        public short PrestigeLevel { get; set; }
 
         #region Navigation Properties
-        public World World { get; set; }
-        public Faction Faction { get; set; }
         public OutfitMember OutfitMember { get; set; }
         #endregion Navigation Properties
     }

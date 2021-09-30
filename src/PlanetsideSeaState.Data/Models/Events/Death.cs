@@ -18,29 +18,24 @@ namespace PlanetsideSeaState.Data.Models.Events
 
         public DeathType DeathType { get; set; }
 
-        public int? AttackerLoadoutId { get; set; }
-        public int? AttackerFactionId { get; set; }
+        public short? AttackerLoadoutId { get; set; }
+        public short? AttackerFactionId { get; set; }
         
-        public int? VictimLoadoutId { get; set; }
-        public int? VictimFactionId { get; set; }
+        public short? VictimLoadoutId { get; set; }
+        public short? VictimFactionId { get; set; }
 
         public bool IsHeadshot { get; set; }
 
         public int? WeaponId { get; set; }
         public int? AttackerVehicleId { get; set; }
 
-        public int? ZoneId { get; set; }
-        public int WorldId { get; set; }
+        public uint? ZoneId { get; set; }
+        public short WorldId { get; set; }
 
-        public int Points { get; set; }
 
         #region Navigation Properties
         public Character AttackerCharacter { get; set; }
         public Character VictimCharacter { get; set; }
-        public Item Weapon { get; set; }
-        public Vehicle AttackerVehicle { get; set; }
-        public World World { get; set; }
-        public Zone Zone { get; set; }
         #endregion Navigation Properties
     }
 }

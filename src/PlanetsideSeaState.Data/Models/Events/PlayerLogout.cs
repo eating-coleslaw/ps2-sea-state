@@ -11,7 +11,7 @@ namespace PlanetsideSeaState.Data.Models.Events
         [Required]
         public DateTime Timestamp { get; set; }
 
-        public int WorldId { get; set; }
+        public short WorldId { get; set; }
 
         #region Navigation Properties
         public Character Character { get; set; }

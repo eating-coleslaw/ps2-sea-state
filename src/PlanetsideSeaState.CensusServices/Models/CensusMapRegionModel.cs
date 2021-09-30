@@ -8,6 +8,6 @@
         public string FacilityName { get; set; }
         public int FacilityTypeId { get; set; }
         public string FacilityType { get; set; }
-        public int ZoneId { get; set; }
+        public uint ZoneId { get; set; }
     }
 }

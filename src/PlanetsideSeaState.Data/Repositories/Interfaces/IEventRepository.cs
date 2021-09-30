@@ -11,7 +11,7 @@ namespace PlanetsideSeaState.Data.Repositories
     public interface IEventRepository
     {
         Task AddAsync<T>(T entity) where T : class;
-        Task<IEnumerable<Death>> GetDeathsForWorldInTimeRange(int worldId, DateTime start, DateTime end);
-        Task<IEnumerable<DeathWithExperience>> GetDeathWithExperienceForWorldInTimeRange(int worldId, DateTime start, DateTime end);
+        Task<IEnumerable<Death>> GetDeathsForWorldInTimeRange(short worldId, DateTime start, DateTime end);
+        Task<IEnumerable<DeathWithExperience>> GetDeathWithExperienceForWorldInTimeRange(short worldId, DateTime start, DateTime end);
     }
 }

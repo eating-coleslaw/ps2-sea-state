@@ -35,7 +35,7 @@ namespace PlanetsideSeaState.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<Death>> GetDeathsForWorldInTimeRange(int worldId, DateTime start, DateTime end)
+        public async Task<IEnumerable<Death>> GetDeathsForWorldInTimeRange(short worldId, DateTime start, DateTime end)
         {
             using var factory = _dbContextHelper.GetFactory();
             var dbContext = factory.GetDbContext();
@@ -55,7 +55,7 @@ namespace PlanetsideSeaState.Data.Repositories
             }
         }
 
-        public async Task<IEnumerable<DeathWithExperience>> GetDeathWithExperienceForWorldInTimeRange(int worldId, DateTime start, DateTime end)
+        public async Task<IEnumerable<DeathWithExperience>> GetDeathWithExperienceForWorldInTimeRange(short worldId, DateTime start, DateTime end)
         {
             using var factory = _dbContextHelper.GetFactory();
             var dbContext = factory.GetDbContext();

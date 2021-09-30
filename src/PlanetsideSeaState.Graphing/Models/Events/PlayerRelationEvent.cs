@@ -11,8 +11,8 @@ namespace PlanetsideSeaState.Graphing.Models.Events
         public Character RecipientCharacter { get; }
         public DateTime Timestamp { get; }
         public PayloadEventType EventType { get; }
-        public int? ZoneId { get; }
-        public int WorldId { get; }
+        public uint? ZoneId { get; }
+        public short WorldId { get; }
         public int? ExperienceId { get; }
 
         public PlayerRelationEvent(Death death)

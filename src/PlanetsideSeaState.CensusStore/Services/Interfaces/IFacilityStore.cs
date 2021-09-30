@@ -8,10 +8,10 @@ namespace PlanetsideSeaState.CensusStore.Services
     {
         Task<IEnumerable<MapRegion>> GetMapRegionByFacilityIdsAsync(params int[] facilityIds);
         Task<IEnumerable<MapRegion>> GetMapRegionsByFacilityTypeAsync(int facilityTypeId);
-        Task<IEnumerable<MapRegion>> GetMapRegionsByZoneIdAsync(int zoneId);
+        Task<IEnumerable<MapRegion>> GetMapRegionsByZoneIdAsync(uint zoneId);
 
-        Task<IEnumerable<FacilityLink>> GetFacilityLinksByZoneIdAsync(int zoneId);
+        Task<IEnumerable<FacilityLink>> GetFacilityLinksByZoneIdAsync(uint zoneId);
         Task<IEnumerable<FacilityLink>> GetFacilityLinksByFacilityIdsAsync(params int[] facilityIds);
-        Task<Dictionary<int, int>> GetMapOwnershipAsync(int worldId, int zoneId);
+        Task<Dictionary<int, short>> GetMapOwnershipAsync(short worldId, uint zoneId);
     }
 }

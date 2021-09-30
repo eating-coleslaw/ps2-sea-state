@@ -120,11 +120,8 @@ namespace PlanetsideSeaState.CensusStore.Services
                 Id = censusModel.CharacterId,
                 Name = censusModel.Name.First,
                 FactionId = censusModel.FactionId,
-                TitleId = censusModel.TitleId,
                 WorldId = censusModel.WorldId,
                 BattleRank = censusModel.BattleRank.Value,
-                BattleRankPercentToNext = censusModel.BattleRank.PercentToNext,
-                CertsEarned = censusModel.Certs.EarnedPoints,
                 PrestigeLevel = censusModel.PrestigeLevel,
                 IsOnline = isOnline,
                 OutfitId = censusModel.OutfitMember?.OutfitId

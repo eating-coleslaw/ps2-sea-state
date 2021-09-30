@@ -28,7 +28,7 @@ namespace PlanetsideSeaState.App.Services.Planetside
             _logger = logger;
         }
 
-        public async Task<ActivityLeaderboardStats> GetWorldPlayerStatsInTimeRange(int worldId, DateTime start, DateTime end, int take = 20)
+        public async Task<ActivityLeaderboardStats> GetWorldPlayerStatsInTimeRange(short worldId, DateTime start, DateTime end, int take = 20)
         {
             //var worldDeaths = await _eventRepository.GetDeathsForWorldInTimeRange(worldId, start, end);
             var worldDeaths = await _eventRepository.GetDeathWithExperienceForWorldInTimeRange(worldId, start, end);

@@ -7,13 +7,13 @@ namespace PlanetsideSeaState.App.Services.Planetside
 {
     public interface IFacilityService
     {
-        Task<IEnumerable<FacilityLink>> GetFacilityLinksByZoneIdAsync(int zoneId);
-        Task<IEnumerable<ZoneRegionOwnership>> GetMapOwnership(int worldId, int zoneId);
+        Task<IEnumerable<FacilityLink>> GetFacilityLinksByZoneIdAsync(uint zoneId);
+        Task<IEnumerable<ZoneRegionOwnership>> GetMapOwnership(short worldId, uint zoneId);
         Task<MapRegion> GetMapRegion(int mapRegionId);
         Task<MapRegion> GetMapRegionFromFacilityId(int facilityId);
         Task<MapRegion> GetMapRegionFromFacilityName(string facilityName);
 
         Task<MapRegion> GetMapRegionsByFacilityType(int facilityTypeId);
-        Task<IEnumerable<MapRegion>> GetMapRegionsByZoneIdAsync(int zoneId);
+        Task<IEnumerable<MapRegion>> GetMapRegionsByZoneIdAsync(uint zoneId);
     }
 }

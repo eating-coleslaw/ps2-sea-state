@@ -24,7 +24,7 @@ namespace PlanetsideSeaState.Data.Repositories
             return await dbContext.MapRegions.Where(r => r.FacilityTypeId == facilityTypeId && r.IsCurrent).ToListAsync();
         }
 
-        public async Task<IEnumerable<MapRegion>> GetMapRegionsByZoneIdAsync(int zoneId)
+        public async Task<IEnumerable<MapRegion>> GetMapRegionsByZoneIdAsync(uint zoneId)
         {
             using var factory = _dbContextHelper.GetFactory();
             var dbContext = factory.GetDbContext();
@@ -48,7 +48,7 @@ namespace PlanetsideSeaState.Data.Repositories
             return await dbContext.MapRegions.Where(r => facilityIds.Contains(r.FacilityId) && r.IsCurrent).ToListAsync();
         }
 
-        public async Task<IEnumerable<FacilityLink>> GetFacilityLinksByZoneIdAsync(int zoneId)
+        public async Task<IEnumerable<FacilityLink>> GetFacilityLinksByZoneIdAsync(uint zoneId)
         {
             using var factory = _dbContextHelper.GetFactory();
             var dbContext = factory.GetDbContext();

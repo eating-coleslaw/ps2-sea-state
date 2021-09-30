@@ -9,6 +9,6 @@ namespace PlanetsideSeaState.App.Services.Planetside
 {
     public interface IEventService
     {
-        Task<ActivityLeaderboardStats> GetWorldPlayerStatsInTimeRange(int worldId, DateTime start, DateTime end, int take);
+        Task<ActivityLeaderboardStats> GetWorldPlayerStatsInTimeRange(short worldId, DateTime start, DateTime end, int take);
     }
 }

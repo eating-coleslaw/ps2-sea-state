@@ -6,9 +6,9 @@ namespace PlanetsideSeaState.Data.Models.Events
     public class ContinentLock
     {
         [Required]
-        public int WorldId { get; set; }
+        public short WorldId { get; set; }
         [Required]
-        public int ZoneId { get; set; }
+        public uint ZoneId { get; set; }
         [Required]
         public DateTime Timestamp { get; set; }
 

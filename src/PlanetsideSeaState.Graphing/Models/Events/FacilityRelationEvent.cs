@@ -10,7 +10,7 @@ namespace PlanetsideSeaState.Graphing.Models.Events
         public string PlayerId { get; set; }
         public int FacilityId { get; set; }
         public DateTime Timestamp { get; set; }
-        public int ZoneId { get; set; }
+        public uint ZoneId { get; set; }
         public PayloadEventType EventType { get; }
     }
 }

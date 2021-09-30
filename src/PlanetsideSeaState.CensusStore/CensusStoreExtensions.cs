@@ -17,14 +17,7 @@ namespace PlanetsideSeaState.CensusStore
             services.AddSingleton<ICharacterStore, CharacterStore>();
             services.AddTransient<IExperienceStore, ExperienceStore>();
             services.AddSingleton<IFacilityStore, FacilityStore>();
-            services.AddSingleton<IFactionStore, FactionStore>();
-            services.AddSingleton<IItemStore, ItemStore>();
-            services.AddTransient<IMetagameEventStore, MetagameEventStore>();
             services.AddSingleton<IOutfitStore, OutfitStore>();
-            services.AddSingleton<IProfileStore, ProfileStore>();
-            services.AddSingleton<IVehicleStore, VehicleStore>();
-            services.AddSingleton<IWorldStore, WorldStore>();
-            services.AddSingleton<IZoneStore, ZoneStore>();
 
             services.AddHostedService<StoreUpdaterSchedulerHostedService>();
 

@@ -124,7 +124,7 @@ namespace PlanetsideSeaState.Graphing.Models
         }
 
 
-        private async Task<PlayerNode> AddOrUpdatePlayerInternal(Character character, int zoneId, DateTime timestamp)
+        private async Task<PlayerNode> AddOrUpdatePlayerInternal(Character character, uint zoneId, DateTime timestamp)
         {
             if (!PlayerIdMap.TryGetValue(character.Id, out var playerNode))
             {

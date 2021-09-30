@@ -30,7 +30,7 @@ namespace PlanetsideSeaState.Graphing.Services.FacilityPopsGraph
             _logger = logger;
         }
 
-        public async Task<bool> TryAddNewService(int worldId, int zoneId)
+        public async Task<bool> TryAddNewService(short worldId, uint zoneId)
         {
             var key = new ServerContinent(worldId, zoneId);
 
@@ -61,7 +61,7 @@ namespace PlanetsideSeaState.Graphing.Services.FacilityPopsGraph
             }
         }
 
-        public async Task<bool> TryRemoveService(int worldId, int zoneId)
+        public async Task<bool> TryRemoveService(short worldId, uint zoneId)
         {
             var key = new ServerContinent(worldId, zoneId);
 
@@ -80,7 +80,7 @@ namespace PlanetsideSeaState.Graphing.Services.FacilityPopsGraph
             }
         }
 
-        public FacilityPopGraphService GetService(int worldId, int zoneId)
+        public FacilityPopGraphService GetService(short worldId, uint zoneId)
         {
             var key = new ServerContinent(worldId, zoneId);
 
@@ -96,7 +96,7 @@ namespace PlanetsideSeaState.Graphing.Services.FacilityPopsGraph
 
         public override async Task StartInternalAsync(CancellationToken cancellationToken)
         {
-            var worldId = 17; // Emerald
+            short worldId = 17; // Emerald
 
             var TaskList = new List<Task>
             {

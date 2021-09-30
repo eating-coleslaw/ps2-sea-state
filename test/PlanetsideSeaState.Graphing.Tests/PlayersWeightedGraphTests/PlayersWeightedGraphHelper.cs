@@ -68,13 +68,13 @@ namespace PlanetsideSeaState.Graphing.Tests.PlayersWeightedGraphTests
         }
 
         #region Player Nodes
-        public static PlayerNode GetA(DateTime seedTime, int zoneId = 1) => new(GetCharacterA(), seedTime, zoneId);
-        public static PlayerNode GetB(DateTime seedTime, int zoneId = 1) => new(GetCharacterB(), seedTime, zoneId);
-        public static PlayerNode GetC(DateTime seedTime, int zoneId = 1) => new(GetCharacterC(), seedTime, zoneId);
-        public static PlayerNode GetD(DateTime seedTime, int zoneId = 1) => new(GetCharacterD(), seedTime, zoneId);
-        public static PlayerNode GetE(DateTime seedTime, int zoneId = 1) => new(GetCharacterE(), seedTime, zoneId);
-        public static PlayerNode GetF(DateTime seedTime, int zoneId = 1) => new(GetCharacterF(), seedTime, zoneId);
-        public static PlayerNode GetG(DateTime seedTime, int zoneId = 1) => new(GetCharacterG(), seedTime, zoneId);
+        public static PlayerNode GetA(DateTime seedTime, uint zoneId = 1) => new(GetCharacterA(), seedTime, zoneId);
+        public static PlayerNode GetB(DateTime seedTime, uint zoneId = 1) => new(GetCharacterB(), seedTime, zoneId);
+        public static PlayerNode GetC(DateTime seedTime, uint zoneId = 1) => new(GetCharacterC(), seedTime, zoneId);
+        public static PlayerNode GetD(DateTime seedTime, uint zoneId = 1) => new(GetCharacterD(), seedTime, zoneId);
+        public static PlayerNode GetE(DateTime seedTime, uint zoneId = 1) => new(GetCharacterE(), seedTime, zoneId);
+        public static PlayerNode GetF(DateTime seedTime, uint zoneId = 1) => new(GetCharacterF(), seedTime, zoneId);
+        public static PlayerNode GetG(DateTime seedTime, uint zoneId = 1) => new(GetCharacterG(), seedTime, zoneId);
         #endregion Player Nodes
 
         #region Player Relation Events
@@ -86,7 +86,7 @@ namespace PlanetsideSeaState.Graphing.Tests.PlayersWeightedGraphTests
         public static PlayerRelationEvent GetDeathEF(DateTime seedTime) => GetDeath(GetCharacterE(), GetCharacterF(), seedTime);
         public static PlayerRelationEvent GetDeathEG(DateTime seedTime) => GetDeath(GetCharacterG(), GetCharacterF(), seedTime);
 
-        public static PlayerRelationEvent GetDeath(Character attacker, Character victim, DateTime seedTime, int worldId = 17, int zoneId = 1)
+        public static PlayerRelationEvent GetDeath(Character attacker, Character victim, DateTime seedTime, short worldId = 17, uint zoneId = 1)
         {
             var death = new Death()
             {
@@ -102,7 +102,7 @@ namespace PlanetsideSeaState.Graphing.Tests.PlayersWeightedGraphTests
             return new PlayerRelationEvent(death);
         }
 
-        public static PlayerRelationEvent GetExperienceGain(Character acting, Character recipient, DateTime seedTime, int experienceId = 2, int worldId = 17, int zoneId = 1)
+        public static PlayerRelationEvent GetExperienceGain(Character acting, Character recipient, DateTime seedTime, int experienceId = 2, short worldId = 17, uint zoneId = 1)
         {
             var xpGain = new ExperienceGain()
             {

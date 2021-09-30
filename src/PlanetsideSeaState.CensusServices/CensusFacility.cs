@@ -17,7 +17,7 @@ namespace PlanetsideSeaState.CensusServices
         }
 
         // Credit to Lampjaw
-        public async Task<CensusMapModel> GetMapOwnership(int worldId, int zoneId)
+        public async Task<CensusMapModel> GetMapOwnership(short worldId, uint zoneId)
         {
             var query = _queryFactory.Create("map");
             query.SetLanguage("en");
@@ -62,7 +62,7 @@ namespace PlanetsideSeaState.CensusServices
             return await query.GetBatchAsync<CensusFacilityLinkModel>();
         }
 
-        public async Task<IEnumerable<CensusFacilityLinkModel>> GetZoneFacilityLinks(int zoneId)
+        public async Task<IEnumerable<CensusFacilityLinkModel>> GetZoneFacilityLinks(uint zoneId)
         {
             var query = _queryFactory.Create("facility_link");
 

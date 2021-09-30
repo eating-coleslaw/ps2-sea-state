@@ -13,8 +13,8 @@ namespace PlanetsideSeaState.Data.Models.Events
         [Required]
         public DateTime Timestamp { get; set; }
 
-        public int WorldId { get; set; }
-        public int ZoneId { get; set; }
+        public short WorldId { get; set; }
+        public uint ZoneId { get; set; }
         public string OutfitId { get; set; }
 
         #region Navigation Properties

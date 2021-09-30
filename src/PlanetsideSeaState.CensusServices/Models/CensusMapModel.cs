@@ -8,7 +8,7 @@ namespace PlanetsideSeaState.CensusServices.Models
     public class CensusMapModel
     {
         [JsonProperty("ZoneId")]
-        public int ZoneId { get; set; }
+        public uint ZoneId { get; set; }
         [JsonProperty("Regions")]
         public CensusMapRegionSet Regions { get; set; }
 
@@ -31,7 +31,7 @@ namespace PlanetsideSeaState.CensusServices.Models
             [JsonProperty("RegionId")]
             public int RegionId { get; set; }
             [JsonProperty("FactionId")]
-            public int FactionId { get; set; }
+            public short FactionId { get; set; }
         }
     }
 }

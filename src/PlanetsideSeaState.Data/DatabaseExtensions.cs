@@ -38,19 +38,10 @@ namespace PlanetsideSeaState.Data
             services.AddSingleton<IDbContextHelper, DbContextHelper>();
             services.AddSingleton<IUpdaterSchedulerRepository, UpdaterSchedulerRepository>();
             
-            services.AddSingleton<IFactionRepository, FactionRepository>();
-            services.AddSingleton<IItemRepository, ItemRepository>();
-            services.AddSingleton<IZoneRepository, ZoneRepository>();
-            services.AddSingleton<IWorldRepository, WorldRepository>();
-            services.AddSingleton<IVehicleRepository, VehicleRepository>();
-            services.AddSingleton<IProfileRepository, ProfileRepository>();
-            services.AddSingleton<ILoadoutRepository, LoadoutRepository>();
             services.AddSingleton<IFacilityRepository, FacilityRepository>();
-            services.AddSingleton<IMetagameEventRepository, MetagameEventRepository>();
             services.AddSingleton<IExperienceRepository, ExperienceRepository>();
             services.AddSingleton<IEventRepository, EventRepository>();
             services.AddSingleton<ICharacterRepository, CharacterRepository>();
-            //services.AddSingleton<IOutfitRepository, OutfitRepository>();
 
             return services;
         }

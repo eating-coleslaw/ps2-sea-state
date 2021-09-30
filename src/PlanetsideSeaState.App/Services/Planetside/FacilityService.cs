@@ -19,19 +19,19 @@ namespace PlanetsideSeaState.App.Services.Planetside
             _logger = logger;
         }
 
-        public async Task<IEnumerable<ZoneRegionOwnership>> GetMapOwnership(int worldId, int zoneId)
+        public async Task<IEnumerable<ZoneRegionOwnership>> GetMapOwnership(short worldId, uint zoneId)
         {
             var mapOwnership = await _facilityStore.GetMapOwnershipAsync(worldId, zoneId);
 
             return mapOwnership?.Select(o => new ZoneRegionOwnership(o.Key, o.Value));
         }
 
-        public async Task<IEnumerable<MapRegion>> GetMapRegionsByZoneIdAsync(int zoneId)
+        public async Task<IEnumerable<MapRegion>> GetMapRegionsByZoneIdAsync(uint zoneId)
         {
             return await _facilityStore.GetMapRegionsByZoneIdAsync(zoneId);
         }
 
-        public async Task<IEnumerable<FacilityLink>> GetFacilityLinksByZoneIdAsync(int zoneId)
+        public async Task<IEnumerable<FacilityLink>> GetFacilityLinksByZoneIdAsync(uint zoneId)
         {
             return await _facilityStore.GetFacilityLinksByZoneIdAsync(zoneId);
         }

@@ -22,7 +22,6 @@ namespace PlanetsideSeaState.Data
         public DbSet<Death> Deaths { get; set; }
         public DbSet<ExperienceGain> ExperienceGains { get; set; }
         public DbSet<FacilityControl> FacilityControls { get; set; }
-        //public DbSet<MetagameEvent> MetagameEvents { get; set; }
         public DbSet<PlayerFacilityCapture> PlayerFacilityCaptures { get; set; }
         public DbSet<PlayerFacilityDefend> PlayerFacilityDefenses { get; set; }
         public DbSet<PlayerLogin> PlayerLogins { get; set; }
@@ -33,20 +32,10 @@ namespace PlanetsideSeaState.Data
         #region Census DbSets
         public DbSet<UpdaterScheduler> UpdaterScheduler { get; set; }
 
-        //public DbSet<Experience> Experiences{ get; set; }
-        //public DbSet<Faction> Factions { get; set; }
+        public DbSet<Experience> Experiences { get; set; }
         public DbSet<FacilityLink> FacilityLinks{ get; set; }
         public DbSet<FacilityType> FacilityTypes { get; set; }
-        //public DbSet<Item> Items { get; set; }
-        //public DbSet<ItemCategory> ItemCategories { get; set; }
-        public DbSet<Loadout> Loadouts { get; set; }
         public DbSet<MapRegion> MapRegions { get; set; }
-        //public DbSet<MetagameEventCategory> MetagameEventCategories { get; set; }
-        //public DbSet<MetagameEventState> MetagameEventStates { get; set; }
-        //public DbSet<Profile> Profiles { get; set; }
-        //public DbSet<Vehicle> Vehicles { get; set; }
-        //public DbSet<World> Worlds { get; set; }
-        //public DbSet<Zone> Zones { get; set; }
         #endregion Census DbSets
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -59,7 +48,6 @@ namespace PlanetsideSeaState.Data
             builder.ApplyConfiguration(new DeathConfiguration());
             builder.ApplyConfiguration(new FacilityControlConfiguration());
             builder.ApplyConfiguration(new ExperienceGainConfiguration());
-            //builder.ApplyConfiguration(new MetagameEventConfiguration());
             builder.ApplyConfiguration(new PlayerFacilityCaptureConfiguration());
             builder.ApplyConfiguration(new PlayerFacilityDefendConfiguration());
             builder.ApplyConfiguration(new PlayerLoginConfiguration());
@@ -71,20 +59,10 @@ namespace PlanetsideSeaState.Data
             builder.ApplyConfiguration(new UpdaterSchedulerConfiguration());
 
             builder.ApplyConfiguration(new CharacterConfiguration());
-            //builder.ApplyConfiguration(new ExperienceConfiguration());
-            //builder.ApplyConfiguration(new FactionConfiguration());
+            builder.ApplyConfiguration(new ExperienceConfiguration());
             builder.ApplyConfiguration(new FacilityLinkConfiguration());
             builder.ApplyConfiguration(new FacilityTypeConfiguration());
-            //builder.ApplyConfiguration(new ItemConfiguration());
-            //builder.ApplyConfiguration(new ItemCategoryConfiguration());
-            builder.ApplyConfiguration(new LoadoutConfiguration());
-            //builder.ApplyConfiguration(new MetagameEventCategoryConfiguration());
-            //builder.ApplyConfiguration(new MetagameEventStateConfiguration());
             builder.ApplyConfiguration(new MapRegionConfiguration());
-            //builder.ApplyConfiguration(new ProfileConfiguration());
-            //builder.ApplyConfiguration(new VehicleConfiguration());
-            //builder.ApplyConfiguration(new WorldConfiguration());
-            //builder.ApplyConfiguration(new ZoneConfiguration());
             #endregion Census Configuration
         }
     }

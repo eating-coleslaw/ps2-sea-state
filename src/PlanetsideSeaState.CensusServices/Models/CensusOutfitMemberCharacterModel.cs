@@ -7,7 +7,7 @@ namespace PlanetsideSeaState.CensusServices.Models
         public CharacterName Name { get; set; }
 
         public string OnlineStatus { get; set; }
-        public int PrestigeLevel { get; set; }
+        public short PrestigeLevel { get; set; }
 
         public string OutfitAlias { get; set; }
         public string OutfitAliasLower { get; set; }

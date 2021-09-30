@@ -16,11 +16,6 @@ namespace PlanetsideSeaState.Data.DataConfigurations.Events
                 e.FacilityId,
                 e.WorldId,
             });
-
-            builder.Property(e => e.Points).HasDefaultValue(0);
-
-            builder.Ignore(e => e.Zone);
-            builder.Ignore(e => e.World);
         }
     }
 }

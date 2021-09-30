@@ -15,18 +15,18 @@ namespace PlanetsideSeaState.Graphing.Models.Relations
         public string RecipientPlayerId { get; private set; }
 
         public PlayerNode OtherPlayer { get; private set; }
-        public int ZoneId { get; private set; }
+        public uint ZoneId { get; private set; }
 
         private readonly AutoResetEvent _autoEvent = new(true);
 
-        public PlayerRelation(PlayerNode player, DateTime timestamp, PayloadEventType eventType, int zoneId, int? experienceId)
+        public PlayerRelation(PlayerNode player, DateTime timestamp, PayloadEventType eventType, uint zoneId, int? experienceId)
             : base(timestamp, eventType, experienceId)
         {
             OtherPlayer = player;
             ZoneId = zoneId;
         }
 
-        public bool TryUpdate(DateTime timestamp, PayloadEventType eventType, int zoneId, int? experienceId)
+        public bool TryUpdate(DateTime timestamp, PayloadEventType eventType, uint zoneId, int? experienceId)
         {
             _autoEvent.WaitOne();
 

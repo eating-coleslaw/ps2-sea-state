@@ -16,7 +16,7 @@ namespace PlanetsideSeaState.Graphing
         public readonly PlayerNode Child;
 
         public DateTime LastUpdate { get; set; }
-        public int? ZoneId { get; private set; }
+        public uint? ZoneId { get; private set; }
         public PayloadEventType EventType { get; private set; }
         public int? ExperienceId { get; private set; }
 
@@ -42,7 +42,7 @@ namespace PlanetsideSeaState.Graphing
             ExpirationTimer = new Timer(OnExpirationReached, null, Lifetime, System.Threading.Timeout.Infinite);
         }
 
-        public PlayerEdge(PlayerNode parent, PlayerNode child, DateTime timestamp, PayloadEventType eventType, int zoneId, int? experienceId, int lifetimeMinutes = 5)
+        public PlayerEdge(PlayerNode parent, PlayerNode child, DateTime timestamp, PayloadEventType eventType, uint zoneId, int? experienceId, int lifetimeMinutes = 5)
         {
             Parent = parent;
             Child = child;
@@ -80,7 +80,7 @@ namespace PlanetsideSeaState.Graphing
             return true;
         }
 
-        public bool TryUpdate(DateTime timestamp, PayloadEventType eventType, int zoneId, int? experienceId)
+        public bool TryUpdate(DateTime timestamp, PayloadEventType eventType, uint zoneId, int? experienceId)
         {
             if (_isExpiring)
             {
@@ -124,7 +124,7 @@ namespace PlanetsideSeaState.Graphing
             return true;
         }
 
-        protected virtual void OnExpirationReached(object? state)
+        protected virtual void OnExpirationReached(object state)
         {
             _isExpiring = true;
 

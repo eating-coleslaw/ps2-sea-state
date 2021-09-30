@@ -6,15 +6,15 @@ namespace PlanetsideSeaState.CensusServices.Models
     {
         public string CharacterId { get; set; }
         public CharacterName Name { get; set; }
-        public int FactionId { get; set; }
+        public short FactionId { get; set; }
         public int TitleId { get; set; }
         public CharacterTimes Times { get; set; }
         public CharacterBattleRank BattleRank { get; set; }
         public CharacterCerts Certs { get; set; }
         public CharacterOutfitMember OutfitMember { get; set; }
-        public int WorldId { get; set; }
+        public short WorldId { get; set; }
         public string OnlineStatus { get; set; }
-        public int PrestigeLevel { get; set; }
+        public short PrestigeLevel { get; set; }
 
         public class CharacterName
         {
@@ -33,7 +33,7 @@ namespace PlanetsideSeaState.CensusServices.Models
         public class CharacterBattleRank
         {
             public int PercentToNext { get; set; }
-            public int Value { get; set; }
+            public short Value { get; set; }
         }
 
         public class CharacterCerts
@@ -50,7 +50,7 @@ namespace PlanetsideSeaState.CensusServices.Models
             public string OutfitId { get; set; }
             public DateTime MemberSinceDate { get; set; }
             public string Rank { get; set; }
-            public int RankOrdinal { get; set; }
+            public short RankOrdinal { get; set; }
         }
     }
 }

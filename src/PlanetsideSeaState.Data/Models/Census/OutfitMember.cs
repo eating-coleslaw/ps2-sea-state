@@ -10,11 +10,11 @@ namespace PlanetsideSeaState.Data.Models.Census
         [Required]
         public string OutfitId { get; set; }
 
-        public int FactionId { get; set; }
+        public short FactionId { get; set; }
 
         public DateTime? MemberSinceDate { get; set; }
         public string Rank { get; set; }
-        public int? RankOrdinal { get; set; }
+        public short? RankOrdinal { get; set; }
 
         public Character Character { get; set; }
         public Outfit Outfit { get; set; }

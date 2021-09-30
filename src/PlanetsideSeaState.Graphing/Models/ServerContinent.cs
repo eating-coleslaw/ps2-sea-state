@@ -2,10 +2,10 @@
 {
     public struct ServerContinent
     {
-        public int WorldId { get; }
-        public int ZoneId { get; }
+        public short WorldId { get; }
+        public uint ZoneId { get; }
 
-        public ServerContinent(int worldId, int zoneId)
+        public ServerContinent(short worldId, uint zoneId)
         {
             WorldId = worldId;
             ZoneId = zoneId;

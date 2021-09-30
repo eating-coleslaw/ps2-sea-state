@@ -12,15 +12,8 @@ namespace PlanetsideSeaState.Data.DataConfigurations.Census
 
             builder.HasKey(e => e.Id);
 
-            //builder.HasKey(e => new
-            //{
-            //    e.FacilityIdA,
-            //    e.FacilityIdB
-            //});
-
             builder.Ignore(e => e.FacilityA);
             builder.Ignore(e => e.FacilityB);
-            builder.Ignore(e => e.Zone);
         }
     }
 }

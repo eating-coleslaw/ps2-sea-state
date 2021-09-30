@@ -12,10 +12,10 @@ namespace PlanetsideSeaState.Graphing.Models.Nodes
     public class PlayerNode
     {
         public string Id { get; }
-        public int FactionId { get; }
+        public short FactionId { get; }
         public string Name { get; }
 
-        public int ZoneId { get; set; }
+        public uint ZoneId { get; set; }
         public DateTime LastSeen { get; private set; }
 
         private ConcurrentDictionary<PlayerNode, PlayerEdge> NeighboringRelations { get; set; } = new();
@@ -34,7 +34,7 @@ namespace PlanetsideSeaState.Graphing.Models.Nodes
         // TODO: add Player Expiration Timer
 
 
-        public PlayerNode(Character character, DateTime lastSeen, int zoneId)
+        public PlayerNode(Character character, DateTime lastSeen, uint zoneId)
         {
             Id = character.Id;
             FactionId = character.FactionId;
@@ -49,7 +49,7 @@ namespace PlanetsideSeaState.Graphing.Models.Nodes
             LastSeen = update.Timestamp;
         }
 
-        public void UpdateLocation(int zoneId, DateTime timestamp)
+        public void UpdateLocation(uint zoneId, DateTime timestamp)
         {
             ZoneId = zoneId;
             LastSeen = timestamp;

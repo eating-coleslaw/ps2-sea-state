@@ -14,10 +14,7 @@ namespace PlanetsideSeaState.Data.DataConfigurations.Census
 
             builder.Property(e => e.PrestigeLevel).HasDefaultValue(0);
 
-            builder
-                .Ignore(e => e.World)
-                .Ignore(e => e.Faction)
-                .Ignore(e => e.OutfitMember);
+            builder.Ignore(e => e.OutfitMember);
         }
     }
 }

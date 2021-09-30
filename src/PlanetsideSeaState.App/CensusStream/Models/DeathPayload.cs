@@ -4,11 +4,11 @@
     {
         public string AttackerCharacterId { get; set; }
         public int? AttackerFireModeId { get; set; }
-        public int? AttackerLoadoutId { get; set; }
+        public short? AttackerLoadoutId { get; set; }
         public int? AttackerVehicleId { get; set; }
         public int? AttackerWeaponId { get; set; }
         public string CharacterId { get; set; }
-        public int? CharacterLoadoutId { get; set; }
+        public short? CharacterLoadoutId { get; set; }
         public bool IsHeadshot { get; set; }
 
         #region IEquitable

@@ -13,10 +13,7 @@ namespace PlanetsideSeaState.Data.DataConfigurations.Census
 
             builder.HasKey(e => e.Id);
 
-            builder
-                .Ignore(e => e.Faction)
-                .Ignore(e => e.World)
-                .Ignore(e => e.LeaderCharacter);
+            builder.Ignore(e => e.LeaderCharacter);
         }
     }
 }

@@ -20,11 +20,6 @@ namespace PlanetsideSeaState.Data.DataConfigurations.Events
 
             builder.Ignore(e => e.AttackerCharacter);
             builder.Ignore(e => e.VictimCharacter);
-            builder.Ignore(e => e.Weapon);
-            builder.Ignore(e => e.AttackerVehicle);
-            builder.Ignore(e => e.VictimVehicle);
-            builder.Ignore(e => e.World);
-            builder.Ignore(e => e.Zone);
             builder.Ignore(e => e.Facility);
         }
     }

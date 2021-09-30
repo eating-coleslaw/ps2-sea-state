@@ -33,8 +33,8 @@ namespace PlanetsideSeaState.Graphing.Services.FacilityPopsGraph
 
 
         public ServerContinent ServiceKey { get; private set; }
-        private int WorldId => ServiceKey.WorldId;
-        private int ZoneId => ServiceKey.ZoneId;
+        private short WorldId => ServiceKey.WorldId;
+        private uint ZoneId => ServiceKey.ZoneId;
 
         private DateTime SeedTimestamp { get; set; }
 

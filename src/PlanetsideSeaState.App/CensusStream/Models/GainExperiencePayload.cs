@@ -17,7 +17,7 @@
         public string CharacterId { get; set; }
         public int ExperienceId { get; set; }
         public int Amount { get; set; }
-        public int? LoadoutId { get; set; }
+        public short? LoadoutId { get; set; }
 
         /*
          * Damage Assists: the player who died
