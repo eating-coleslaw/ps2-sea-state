@@ -13,5 +13,6 @@ namespace PlanetsideSeaState.Data.Repositories
         Task AddAsync<T>(T entity) where T : class;
         Task<IEnumerable<Death>> GetDeathsForWorldInTimeRange(short worldId, DateTime start, DateTime end);
         Task<IEnumerable<DeathWithExperience>> GetDeathWithExperienceForWorldInTimeRange(short worldId, DateTime start, DateTime end);
+        Task<IEnumerable<FacilityControlInfo>> GetRecentFacilityControlsAsync(short? worldId, int? facilityId, short? rowLimit);
     }
 }

@@ -23,9 +23,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Migrations\" />
-    <Folder Include="SQL\" />
     <Folder Include="SQL\StoredProcedures\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="SQL\Functions\GetRecentFacilityControls.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SQL\Views\CurrentMapRegions.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

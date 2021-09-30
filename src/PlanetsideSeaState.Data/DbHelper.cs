@@ -16,10 +16,8 @@ namespace PlanetsideSeaState.Data
 
         public NpgsqlConnection CreateConnection() => new(_dbOptions.DBConnectionString);
         
-        public async Task<NpgsqlCommand> CreateTextCommand(string cmdText)
+        public async Task<NpgsqlCommand> CreateTextCommand(NpgsqlConnection connection, string cmdText)
         {
-            var connection = CreateConnection();
-
             await connection.OpenAsync();
 
             var command = connection.CreateCommand();
@@ -29,10 +27,8 @@ namespace PlanetsideSeaState.Data
             return command;
         }
         
-        public async Task<NpgsqlCommand> CreateStoredProcedureCommand(string procedureName)
+        public async Task<NpgsqlCommand> CreateStoredProcedureCommand(NpgsqlConnection connection, string procedureName)
         {
-            var connection = CreateConnection();
-
             await connection.OpenAsync();
 
             var command = connection.CreateCommand();

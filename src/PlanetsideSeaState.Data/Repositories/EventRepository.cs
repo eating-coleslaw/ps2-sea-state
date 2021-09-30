@@ -12,10 +12,14 @@ namespace PlanetsideSeaState.Data.Repositories
     public class EventRepository : IEventRepository
     {
         private readonly IDbContextHelper _dbContextHelper;
+        private readonly IDbHelper _dbHelper;
+        private readonly IDataReader<FacilityControlInfo> _controlDataReader;
 
-        public EventRepository(IDbContextHelper dbContextHelper)
+        public EventRepository(IDbContextHelper dbContextHelper, IDbHelper dbHelper, IDataReader<FacilityControlInfo> controlDataReader)
         {
             _dbContextHelper = dbContextHelper;
+            _dbHelper = dbHelper;
+            _controlDataReader = controlDataReader ?? throw new ArgumentNullException(nameof(controlDataReader));
         }
 
         // Credit to Lampjaw
@@ -140,6 +144,22 @@ namespace PlanetsideSeaState.Data.Repositories
             //return await query
             //                .AsNoTracking()
             //                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<FacilityControlInfo>> GetRecentFacilityControlsAsync(short? worldId, int? facilityId, short? rowLimit)
+        {
+            using NpgsqlConnection connection = _dbHelper.CreateConnection();
+            
+            using NpgsqlCommand cmd = await _dbHelper.CreateTextCommand(connection, @"SELECT * FROM GetRecentFacilityControls(@worldId, @facilityId, @rowLimit);");
+
+            cmd.AddParameter("worldId", worldId);
+            cmd.AddParameter("@facilityId", facilityId);
+            cmd.AddParameter("@rowLimit", rowLimit);
+
+            IEnumerable<FacilityControlInfo> events = await _controlDataReader.ReadList(cmd);
+            await connection.CloseAsync();
+
+            return events;
         }
     }
 }

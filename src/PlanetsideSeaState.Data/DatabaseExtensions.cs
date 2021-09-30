@@ -7,6 +7,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Reflection;
+using PlanetsideSeaState.Data.Models.QueryResults;
+using PlanetsideSeaState.Data.DataReaders;
 
 namespace PlanetsideSeaState.Data
 {
@@ -21,6 +23,8 @@ namespace PlanetsideSeaState.Data
         {
             services.AddOptions();
             services.Configure<DatabaseOptions>(configuration);
+
+            services.Configure<DatabaseOptions>(configuration.GetSection("DatabaseOptions"));
 
             var options = configuration.Get<DatabaseOptions>();
 
@@ -42,6 +46,8 @@ namespace PlanetsideSeaState.Data
             services.AddSingleton<IExperienceRepository, ExperienceRepository>();
             services.AddSingleton<IEventRepository, EventRepository>();
             services.AddSingleton<ICharacterRepository, CharacterRepository>();
+
+            services.AddSingleton<IDataReader<FacilityControlInfo>, FacilityControlInfoReader>();
 
             return services;
         }

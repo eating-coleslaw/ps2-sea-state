@@ -14,15 +14,17 @@ namespace PlanetsideSeaState.Data
         /// <summary>
         /// Get a new <see cref="NpgsqlCommand"/> with type object from SQL command text.
         /// </summary>
+        /// <param name="connection">Connection the command will be executed on</param>
         /// <param name="cmdText">SQL text of the command</param>
         /// <returns>A <see cref="NpgsqlCommand"/> with a CommandType of CommandType.Text</returns>
-        Task<NpgsqlCommand> CreateTextCommand(string cmdText);
+        Task<NpgsqlCommand> CreateTextCommand(NpgsqlConnection connection, string cmdText);
 
         /// <summary>
         /// Get a new <see cref="NpgsqlCommand"/> object for executing a SQL stored procedure.
         /// </summary>
+        /// <param name="connection">Connection the command will be executed on</param>
         /// <param name="procedureName">The name of the stored procedure to execute</param>
         /// <returns>A <see cref="NpgsqlCommand"/> with a CommandType of CommandType.StoredProcedure</returns>
-        Task<NpgsqlCommand> CreateStoredProcedureCommand(string procedureName);
+        Task<NpgsqlCommand> CreateStoredProcedureCommand(NpgsqlConnection connection, string procedureName);
     }
 }
