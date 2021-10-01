@@ -21,7 +21,7 @@ namespace PlanetsideSeaState.Api.Controllers
             _eventRepository = eventRepository;
         }
 
-        // GET: api/<FacilityControlController>
+        // GET: api/FacilityControls/recent?worldId=17&facilityId=224&limit=10
         [HttpGet("recent")]
         public async Task<IEnumerable<FacilityControlInfo>> GetRecentFacilityControlsAsync([FromQuery] short? worldId, [FromQuery] int? facilityId, [FromQuery] short? limit)
         {
@@ -33,18 +33,6 @@ namespace PlanetsideSeaState.Api.Controllers
         public string Get(int id)
         {
             return "value";
-        }
-
-        // POST api/<FacilityControlController>
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-        }
-
-        // PUT api/<FacilityControlController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
         }
 
         // DELETE api/<FacilityControlController>/5
