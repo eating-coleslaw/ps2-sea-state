@@ -28,7 +28,7 @@ namespace PlanetsideSeaState.App.CensusStream.EventProcessors
 
         public async Task Process(DeathPayload payload)
         {
-            if (!await _deathFilter.TryFilterNewPayload(payload, p => $"{p.Timestamp:s}^{p.AttackerCharacterId}^{p.CharacterId}"))
+            if (!await _deathFilter.TryFilterNewPayload(payload, p => $"{p.Timestamp:s}"))
             {
                 return;
             }

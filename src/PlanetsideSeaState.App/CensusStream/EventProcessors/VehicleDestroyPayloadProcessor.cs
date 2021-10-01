@@ -27,7 +27,7 @@ namespace PlanetsideSeaState.App.CensusStream.EventProcessors
 
         public async Task Process(VehicleDestroyPayload payload)
         {
-            if (!await _vehicleDestroyFilter.TryFilterNewPayload(payload, p => $"{p.Timestamp:s}^{p.AttackerCharacterId}^{p.CharacterId}^{p.AttackerVehicleId}"))
+            if (!await _vehicleDestroyFilter.TryFilterNewPayload(payload, p => $"{p.Timestamp:s}"))
             {
                 return;
             }

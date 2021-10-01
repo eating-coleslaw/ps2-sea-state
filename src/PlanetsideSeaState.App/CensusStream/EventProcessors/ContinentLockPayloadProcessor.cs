@@ -23,7 +23,7 @@ namespace PlanetsideSeaState.App.CensusStream.EventProcessors
 
         public async Task Process(ContinentLockPayload payload)
         {
-            if (!await _lockFilter.TryFilterNewPayload(payload, p => $"{p.Timestamp:s}^{p.WorldId}^{p.ZoneId}"))
+            if (!await _lockFilter.TryFilterNewPayload(payload, p => $"{p.Timestamp:s}"))
             {
                 return;
             }

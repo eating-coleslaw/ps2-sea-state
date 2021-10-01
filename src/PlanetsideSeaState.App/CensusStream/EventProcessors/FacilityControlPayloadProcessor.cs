@@ -24,7 +24,7 @@ namespace PlanetsideSeaState.App.CensusStream.EventProcessors
 
         public async Task Process(FacilityControlPayload payload)
         {
-            if (!await _facilityControlFilter.TryFilterNewPayload(payload, p => $"{p.Timestamp:s}^{p.FacilityId}^{p.WorldId}"))
+            if (!await _facilityControlFilter.TryFilterNewPayload(payload, p => $"{p.Timestamp:s}"))
             {
                 return;
             }
