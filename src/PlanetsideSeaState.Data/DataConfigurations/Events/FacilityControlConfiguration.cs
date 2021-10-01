@@ -10,12 +10,18 @@ namespace PlanetsideSeaState.Data.DataConfigurations.Events
         {
             builder.ToTable("FacilityControl");
 
-            builder.HasKey(e => new
-            {
-                e.Timestamp,
-                e.FacilityId,
-                e.WorldId,
-            });
+            builder.HasKey(e => e.Id);
+
+            builder.HasIndex(e => new { e.Timestamp, e.WorldId, e.FacilityId });
+
+            builder.Ignore(e => e.PlayerControls);
+
+            //builder.HasKey(e => new
+            //{
+            //    e.Timestamp,
+            //    e.FacilityId,
+            //    e.WorldId,
+            //});
         }
     }
 }

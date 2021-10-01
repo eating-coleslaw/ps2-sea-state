@@ -22,8 +22,9 @@ namespace PlanetsideSeaState.Data
         public DbSet<Death> Deaths { get; set; }
         public DbSet<ExperienceGain> ExperienceGains { get; set; }
         public DbSet<FacilityControl> FacilityControls { get; set; }
-        public DbSet<PlayerFacilityCapture> PlayerFacilityCaptures { get; set; }
-        public DbSet<PlayerFacilityDefend> PlayerFacilityDefenses { get; set; }
+        //public DbSet<PlayerFacilityCapture> PlayerFacilityCaptures { get; set; }
+        //public DbSet<PlayerFacilityDefend> PlayerFacilityDefenses { get; set; }
+        public DbSet<PlayerFacilityControl> PlayerFacilityControls { get; set; }
         public DbSet<PlayerLogin> PlayerLogins { get; set; }
         public DbSet<PlayerLogout> PlayerLogouts { get; set; }
         public DbSet<VehicleDestruction> VehicleDestructions { get; set; }
@@ -48,8 +49,9 @@ namespace PlanetsideSeaState.Data
             builder.ApplyConfiguration(new DeathConfiguration());
             builder.ApplyConfiguration(new FacilityControlConfiguration());
             builder.ApplyConfiguration(new ExperienceGainConfiguration());
-            builder.ApplyConfiguration(new PlayerFacilityCaptureConfiguration());
-            builder.ApplyConfiguration(new PlayerFacilityDefendConfiguration());
+            //builder.ApplyConfiguration(new PlayerFacilityCaptureConfiguration());
+            //builder.ApplyConfiguration(new PlayerFacilityDefendConfiguration());
+            builder.ApplyConfiguration(new PlayerFacilityControlConfiguration());
             builder.ApplyConfiguration(new PlayerLoginConfiguration());
             builder.ApplyConfiguration(new PlayerLogoutConfiguration());
             builder.ApplyConfiguration(new VehicleDestructionConfiguration());

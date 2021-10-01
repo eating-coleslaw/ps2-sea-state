@@ -14,7 +14,7 @@ namespace PlanetsideSeaState.App.CensusStream.EventProcessors
         private readonly IEventRepository _eventRepository;
         private readonly ILogger<FacilityControlPayloadProcessor> _logger;
 
-        private PayloadUniquenessFilter<FacilityControlPayload> _facilityControlFilter = new PayloadUniquenessFilter<FacilityControlPayload>();
+        private PayloadUniquenessFilter<FacilityControlPayload> _facilityControlFilter = new();
 
         public FacilityControlPayloadProcessor(IEventRepository eventRepository, ILogger<FacilityControlPayloadProcessor> logger)
         {
@@ -29,30 +29,45 @@ namespace PlanetsideSeaState.App.CensusStream.EventProcessors
                 return;
             }
 
-            var oldFactionId = payload.OldFactionId;
-            var newFactionId = payload.NewFactionId;
+            if (payload.ZoneId == null)
+            {
+                return;
+            }
+
+            // Exclude base flips that came from a continent lock/unlock
+            if (payload.OldFactionId == 0 || payload.NewFactionId == 0)
+            {
+                return;
+            }
+
+            // Exclude base flips in a tutorial area
+            var dynamicZoneId = new DynamicZoneId(payload.ZoneId.Value);
+            if (dynamicZoneId.DefinitionId == 95)
+            {
+                return;
+            }
 
             try
             {
 
-                var controlType = GetFacilityControlType(oldFactionId, newFactionId);
+                //var controlType = GetFacilityControlType(oldFactionId, newFactionId);
 
-                if (!controlType.HasValue)
-                {
-                    return;
-                }
+                //if (!controlType.HasValue)
+                //{
+                //    return;
+                //}
 
                 var dataModel = new FacilityControl
                 {
                     Timestamp = payload.Timestamp,
-                    ControlType = controlType.Value,
+                    FacilityId = payload.FacilityId,
+                    //ControlType = controlType.Value,
+                    IsCapture = payload.NewFactionId != payload.OldFactionId,
                     NewFactionId = payload.NewFactionId,
                     OldFactionId = payload.OldFactionId,
-                    FacilityId = payload.FacilityId,
-                    ZoneId = payload.ZoneId,
+                    ZoneId = payload.ZoneId ?? 0,
                     WorldId = payload.WorldId
                 };
-
 
                 if (ShouldStoreEvent())
                 {

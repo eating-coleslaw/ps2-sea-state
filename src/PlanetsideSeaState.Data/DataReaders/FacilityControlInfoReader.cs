@@ -1,6 +1,5 @@
 ﻿using Npgsql;
 using PlanetsideSeaState.Data.Models.QueryResults;
-using PlanetsideSeaState.Shared.Planetside;
 using System.Data;
 using System.Text;
 
@@ -12,11 +11,13 @@ namespace PlanetsideSeaState.Data.DataReaders
         {
             FacilityControlInfo control = new();
 
+            control.Id = reader.GetGuid("id");
             control.FacilityId = reader.GetInt32("facility_id");
             control.WorldId = reader.GetInt16("world_id");
             control.Timestamp = reader.GetDateTime("timestamp");
             control.FacilityName = reader.GetString("facility_name");
-            control.ControlType = (FacilityControlType)reader.GetInt32("control_type");
+            //control.ControlType = (FacilityControlType)reader.GetInt32("control_type");
+            control.IsCapture = reader.GetBoolean("is_capture");
             control.OldFactionId = reader.GetInt16("old_faction_id");
             control.NewFactionId = reader.GetInt16("new_faction_id");
             control.ZoneId = reader.GetUInt32("zone_id");

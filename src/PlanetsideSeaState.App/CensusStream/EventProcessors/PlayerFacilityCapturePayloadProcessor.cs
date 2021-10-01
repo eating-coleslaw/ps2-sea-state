@@ -16,7 +16,7 @@ namespace PlanetsideSeaState.App.CensusStream.EventProcessors
 
         private readonly PayloadUniquenessFilter<PlayerFacilityCapturePayload> _playerFacilityCaptureFilter = new PayloadUniquenessFilter<PlayerFacilityCapturePayload>();
 
-        private readonly SemaphoreSlim _playerFacilityCaptureSemaphore = new SemaphoreSlim(5);
+        private readonly SemaphoreSlim _playerFacilityCaptureSemaphore = new(5);
 
         public PlayerFacilityCapturePayloadProcessor(IEventRepository eventRepository, ILogger<PlayerFacilityCapturePayloadProcessor> logger)
         {
@@ -31,9 +31,7 @@ namespace PlanetsideSeaState.App.CensusStream.EventProcessors
                 return;
             }
 
-            var characterId = payload.CharacterId;
-
-            if (!IsValidCharacterId(characterId))
+            if (!IsValidCharacterId(payload.CharacterId))
             {
                 return;
             }
@@ -42,21 +40,37 @@ namespace PlanetsideSeaState.App.CensusStream.EventProcessors
 
             try
             {
-                var dataModel = new PlayerFacilityCapture
+                var dataModel = new PlayerFacilityControl
                 {
-                    CharacterId = characterId,
-                    Timestamp = payload.Timestamp,
-                    WorldId = payload.WorldId,
-                    ZoneId = payload.ZoneId.Value,
                     FacilityId = payload.FacilityId,
-                    OutfitId = payload.OutfitId == "0" ? null : payload.OutfitId // credit to Lampjaw
+                    Timestamp = payload.Timestamp,
+                    CharacterId = payload.CharacterId,
+                    IsCapture = true,
+                    WorldId = payload.WorldId,
+                    ZoneId = payload.ZoneId ?? 0,
+                    OutfitId = payload.OutfitId == "0" ? null : payload.OutfitId
                 };
 
                 if (ShouldStoreEvent())
                 {
-                    await _eventRepository.AddAsync(dataModel);
-                }
+                    new Thread(async () =>
+                    {
+                        // Wait a second for the corresponding FacilityControl event to be received
+                        await Task.Delay(1000);
 
+                        var facilityControl = await _eventRepository.GetFacilityControl(dataModel.FacilityId, dataModel.Timestamp, dataModel.WorldId);
+
+                        if (facilityControl == null)
+                        {
+                            return;
+                        }
+
+                        dataModel.FacilityControlId = facilityControl.Id;
+
+                        await _eventRepository.AddAsync(dataModel);
+
+                    }).Start();
+                }
 
                 // Send dataModel to other services for additional handling
 

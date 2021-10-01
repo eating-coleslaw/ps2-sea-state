@@ -146,6 +146,25 @@ namespace PlanetsideSeaState.Data.Repositories
             //                .ToListAsync();
         }
 
+        public async Task<FacilityControl> GetFacilityControl(int facilityId, DateTime timestamp, short worldId)
+        {
+            using var factory = _dbContextHelper.GetFactory();
+            var dbContext = factory.GetDbContext();
+
+            try
+            {
+                return await dbContext.FacilityControls
+                                        .Where(e => e.FacilityId == facilityId
+                                                 && e.Timestamp == timestamp
+                                                 && e.WorldId == worldId)
+                                        .FirstOrDefaultAsync();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         public async Task<IEnumerable<FacilityControlInfo>> GetRecentFacilityControlsAsync(short? worldId, int? facilityId, short? rowLimit)
         {
             using NpgsqlConnection connection = _dbHelper.CreateConnection();

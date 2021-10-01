@@ -19,6 +19,7 @@ namespace PlanetsideSeaState.Data.DataConfigurations.Events
 
             builder.Ignore(e => e.Character);
             builder.Ignore(e => e.Facility);
+            builder.Ignore(e => e.FacilityControl);
         }
     }
 }

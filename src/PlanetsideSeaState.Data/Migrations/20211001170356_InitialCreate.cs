@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace PlanetsideSeaState.Data.Migrations
@@ -86,17 +87,18 @@ namespace PlanetsideSeaState.Data.Migrations
                 name: "FacilityControl",
                 columns: table => new
                 {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Timestamp = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     FacilityId = table.Column<int>(type: "integer", nullable: false),
-                    WorldId = table.Column<short>(type: "smallint", nullable: false),
-                    ControlType = table.Column<int>(type: "integer", nullable: false),
-                    OldFactionId = table.Column<short>(type: "smallint", nullable: true),
-                    NewFactionId = table.Column<short>(type: "smallint", nullable: true),
-                    ZoneId = table.Column<long>(type: "bigint", nullable: true)
+                    IsCapture = table.Column<bool>(type: "boolean", nullable: false),
+                    OldFactionId = table.Column<short>(type: "smallint", nullable: false),
+                    NewFactionId = table.Column<short>(type: "smallint", nullable: false),
+                    ZoneId = table.Column<long>(type: "bigint", nullable: false),
+                    WorldId = table.Column<short>(type: "smallint", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_FacilityControl", x => new { x.Timestamp, x.FacilityId, x.WorldId });
+                    table.PrimaryKey("PK_FacilityControl", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -142,38 +144,6 @@ namespace PlanetsideSeaState.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_MapRegion", x => new { x.Id, x.FacilityId });
-                });
-
-            migrationBuilder.CreateTable(
-                name: "PlayerFacilityCapture",
-                columns: table => new
-                {
-                    CharacterId = table.Column<string>(type: "text", nullable: false),
-                    FacilityId = table.Column<int>(type: "integer", nullable: false),
-                    Timestamp = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    WorldId = table.Column<short>(type: "smallint", nullable: false),
-                    ZoneId = table.Column<long>(type: "bigint", nullable: false),
-                    OutfitId = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PlayerFacilityCapture", x => new { x.Timestamp, x.CharacterId, x.FacilityId });
-                });
-
-            migrationBuilder.CreateTable(
-                name: "PlayerFacilityDefend",
-                columns: table => new
-                {
-                    CharacterId = table.Column<string>(type: "text", nullable: false),
-                    FacilityId = table.Column<int>(type: "integer", nullable: false),
-                    Timestamp = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    WorldId = table.Column<short>(type: "smallint", nullable: false),
-                    ZoneId = table.Column<long>(type: "bigint", nullable: false),
-                    OutfitId = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PlayerFacilityDefend", x => new { x.Timestamp, x.CharacterId, x.FacilityId });
                 });
 
             migrationBuilder.CreateTable(
@@ -235,15 +205,57 @@ namespace PlanetsideSeaState.Data.Migrations
                     table.PrimaryKey("PK_VehicleDestruction", x => new { x.Timestamp, x.AttackerCharacterId, x.VictimCharacterId, x.VictimVehicleId });
                 });
 
-            migrationBuilder.CreateIndex(
-                name: "IX_ExperienceGain_Timestamp_CharacterId_ExperienceId",
-                table: "ExperienceGain",
-                columns: new[] { "Timestamp", "CharacterId", "ExperienceId" });
+            migrationBuilder.CreateTable(
+                name: "PlayerFacilityControl",
+                columns: table => new
+                {
+                    FacilityId = table.Column<int>(type: "integer", nullable: false),
+                    Timestamp = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    CharacterId = table.Column<string>(type: "text", nullable: false),
+                    FacilityControlId = table.Column<Guid>(type: "uuid", nullable: false),
+                    IsCapture = table.Column<bool>(type: "boolean", nullable: false),
+                    WorldId = table.Column<short>(type: "smallint", nullable: false),
+                    ZoneId = table.Column<long>(type: "bigint", nullable: false),
+                    OutfitId = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PlayerFacilityControl", x => new { x.Timestamp, x.FacilityId, x.CharacterId });
+                    table.ForeignKey(
+                        name: "FK_PlayerFacilityControl_FacilityControl_FacilityControlId",
+                        column: x => x.FacilityControlId,
+                        principalTable: "FacilityControl",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
 
             migrationBuilder.CreateIndex(
-                name: "IX_ExperienceGain_Timestamp_WorldId_ExperienceId_ZoneId",
+                name: "IX_ExperienceGain_Timestamp_WorldId_ZoneId",
                 table: "ExperienceGain",
-                columns: new[] { "Timestamp", "WorldId", "ExperienceId", "ZoneId" });
+                columns: new[] { "Timestamp", "WorldId", "ZoneId" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FacilityControl_Timestamp_WorldId_FacilityId",
+                table: "FacilityControl",
+                columns: new[] { "Timestamp", "WorldId", "FacilityId" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlayerFacilityControl_FacilityControlId",
+                table: "PlayerFacilityControl",
+                column: "FacilityControlId");
+
+            // Run View / Function / Stored Procedure scripts
+            var basePath = AppDomain.CurrentDomain.RelativeSearchPath ?? AppDomain.CurrentDomain.BaseDirectory;
+
+            // CurrentMapRegions View
+            var mapRegionsViewSqlFile = "SQL/Views/CurrentMapRegions.sql";
+            var mapRegionsViewFilePath = Path.Combine(basePath, mapRegionsViewSqlFile);
+            migrationBuilder.Sql(File.ReadAllText(mapRegionsViewFilePath));
+
+            // GetRecentFacilityControls Function
+            var recentControlsFunctionSqlFile = "SQL/Functions/GetRecentFacilityControls.sql";
+            var recentControlsFunctionFilePath = Path.Combine(basePath, recentControlsFunctionSqlFile);
+            migrationBuilder.Sql(File.ReadAllText(recentControlsFunctionFilePath));
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -261,9 +273,6 @@ namespace PlanetsideSeaState.Data.Migrations
                 name: "ExperienceGain");
 
             migrationBuilder.DropTable(
-                name: "FacilityControl");
-
-            migrationBuilder.DropTable(
                 name: "FacilityLink");
 
             migrationBuilder.DropTable(
@@ -273,10 +282,7 @@ namespace PlanetsideSeaState.Data.Migrations
                 name: "MapRegion");
 
             migrationBuilder.DropTable(
-                name: "PlayerFacilityCapture");
-
-            migrationBuilder.DropTable(
-                name: "PlayerFacilityDefend");
+                name: "PlayerFacilityControl");
 
             migrationBuilder.DropTable(
                 name: "PlayerLogin");
@@ -289,6 +295,9 @@ namespace PlanetsideSeaState.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "VehicleDestruction");
+
+            migrationBuilder.DropTable(
+                name: "FacilityControl");
         }
     }
 }

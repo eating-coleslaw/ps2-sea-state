@@ -4,11 +4,12 @@
   i_rowLimit smallint DEFAULT 20
 )
   RETURNS TABLE (
+    Id uuid,
     Facility_Id int,
     World_Id smallint,
     "timestamp" timestamp without time zone,
     Facility_Name text,
-    Control_Type int,
+    Is_Capture boolean,
     Old_Faction_Id smallint,
     New_Faction_Id smallint,
     Zone_Id bigint,
@@ -22,11 +23,12 @@ $BODY$
 BEGIN
 
   RETURN QUERY
-    SELECT controls."FacilityId",
+    SELECT controls."Id",
+           controls."FacilityId",
            controls."WorldId",
            controls."Timestamp",
            regions."FacilityName",
-           controls."ControlType",
+           controls."IsCapture",
            controls."OldFactionId",
            controls."NewFactionId",
            controls."ZoneId",
@@ -34,14 +36,15 @@ BEGIN
            regions."FacilityTypeId",
            regions."FacilityType"
       FROM "FacilityControl" AS controls
-        INNER JOIN TEST_CurrentMapRegions AS regions
+        INNER JOIN CurrentMapRegions AS regions
           on controls."FacilityId" = regions."FacilityId"
       WHERE (i_worldId IS NULL
             OR i_worldId = controls."WorldId")
         AND (i_facilityId IS NULL
             OR i_facilityId = controls."FacilityId")
       ORDER BY controls."Timestamp" DESC
-      LIMIT LEAST(i_rowLimit, 100::smallint);
+      LIMIT CASE WHEN i_rowLimit IS NULL THEN 10
+                 ELSE LEAST(i_rowLimit, 100::smallint) END;
 
 END;
 $BODY$

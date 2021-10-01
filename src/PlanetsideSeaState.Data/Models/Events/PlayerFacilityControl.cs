@@ -1,19 +1,25 @@
 ﻿using PlanetsideSeaState.Data.Models.Census;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace PlanetsideSeaState.Data.Models.Events
 {
-    public class PlayerFacilityCapture
+    public class PlayerFacilityControl
     {
-        [Required]
-        public string CharacterId { get; set; }
         [Required]
         public int FacilityId { get; set; }
         [Required]
         public DateTime Timestamp { get; set; }
+        [Required]
+        public string CharacterId { get; set; }
 
         public Guid FacilityControlId { get; set; }
+
+        public bool IsCapture { get; set; }
 
         public short WorldId { get; set; }
         public uint ZoneId { get; set; }

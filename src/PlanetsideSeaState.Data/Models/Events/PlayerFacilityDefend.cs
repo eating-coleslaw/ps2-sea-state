@@ -13,6 +13,8 @@ namespace PlanetsideSeaState.Data.Models.Events
         [Required]
         public DateTime Timestamp { get; set; }
 
+        public Guid FacilityControlId { get; set; }
+
         public short WorldId { get; set; }
         public uint ZoneId { get; set; }
         public string OutfitId { get; set; }
@@ -20,6 +22,7 @@ namespace PlanetsideSeaState.Data.Models.Events
         #region Navigation Properties
         public Character Character { get; set; }
         public MapRegion Facility { get; set; }
+        public FacilityControl FacilityControl { get; set; }
         #endregion Navigation Properties
     }
 }

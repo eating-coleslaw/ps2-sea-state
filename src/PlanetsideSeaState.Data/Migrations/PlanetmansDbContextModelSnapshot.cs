@@ -221,51 +221,61 @@ namespace PlanetsideSeaState.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Timestamp", "CharacterId", "ExperienceId");
-
-                    b.HasIndex("Timestamp", "WorldId", "ExperienceId", "ZoneId");
+                    b.HasIndex("Timestamp", "WorldId", "ZoneId");
 
                     b.ToTable("ExperienceGain");
                 });
 
             modelBuilder.Entity("PlanetsideSeaState.Data.Models.Events.FacilityControl", b =>
                 {
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("timestamp without time zone");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
 
                     b.Property<int>("FacilityId")
                         .HasColumnType("integer");
 
+                    b.Property<bool>("IsCapture")
+                        .HasColumnType("boolean");
+
+                    b.Property<short>("NewFactionId")
+                        .HasColumnType("smallint");
+
+                    b.Property<short>("OldFactionId")
+                        .HasColumnType("smallint");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("timestamp without time zone");
+
                     b.Property<short>("WorldId")
                         .HasColumnType("smallint");
 
-                    b.Property<int>("ControlType")
-                        .HasColumnType("integer");
-
-                    b.Property<short?>("NewFactionId")
-                        .HasColumnType("smallint");
-
-                    b.Property<short?>("OldFactionId")
-                        .HasColumnType("smallint");
-
-                    b.Property<long?>("ZoneId")
+                    b.Property<long>("ZoneId")
                         .HasColumnType("bigint");
 
-                    b.HasKey("Timestamp", "FacilityId", "WorldId");
+                    b.HasKey("Id");
+
+                    b.HasIndex("Timestamp", "WorldId", "FacilityId");
 
                     b.ToTable("FacilityControl");
                 });
 
-            modelBuilder.Entity("PlanetsideSeaState.Data.Models.Events.PlayerFacilityCapture", b =>
+            modelBuilder.Entity("PlanetsideSeaState.Data.Models.Events.PlayerFacilityControl", b =>
                 {
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<int>("FacilityId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("CharacterId")
                         .HasColumnType("text");
 
-                    b.Property<int>("FacilityId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("FacilityControlId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsCapture")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("OutfitId")
                         .HasColumnType("text");
@@ -276,34 +286,11 @@ namespace PlanetsideSeaState.Data.Migrations
                     b.Property<long>("ZoneId")
                         .HasColumnType("bigint");
 
-                    b.HasKey("Timestamp", "CharacterId", "FacilityId");
+                    b.HasKey("Timestamp", "FacilityId", "CharacterId");
 
-                    b.ToTable("PlayerFacilityCapture");
-                });
+                    b.HasIndex("FacilityControlId");
 
-            modelBuilder.Entity("PlanetsideSeaState.Data.Models.Events.PlayerFacilityDefend", b =>
-                {
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("CharacterId")
-                        .HasColumnType("text");
-
-                    b.Property<int>("FacilityId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("OutfitId")
-                        .HasColumnType("text");
-
-                    b.Property<short>("WorldId")
-                        .HasColumnType("smallint");
-
-                    b.Property<long>("ZoneId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Timestamp", "CharacterId", "FacilityId");
-
-                    b.ToTable("PlayerFacilityDefend");
+                    b.ToTable("PlayerFacilityControl");
                 });
 
             modelBuilder.Entity("PlanetsideSeaState.Data.Models.Events.PlayerLogin", b =>
@@ -389,6 +376,22 @@ namespace PlanetsideSeaState.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("UpdaterScheduler");
+                });
+
+            modelBuilder.Entity("PlanetsideSeaState.Data.Models.Events.PlayerFacilityControl", b =>
+                {
+                    b.HasOne("PlanetsideSeaState.Data.Models.Events.FacilityControl", "FacilityControl")
+                        .WithMany("PlayerControls")
+                        .HasForeignKey("FacilityControlId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FacilityControl");
+                });
+
+            modelBuilder.Entity("PlanetsideSeaState.Data.Models.Events.FacilityControl", b =>
+                {
+                    b.Navigation("PlayerControls");
                 });
 #pragma warning restore 612, 618
         }
