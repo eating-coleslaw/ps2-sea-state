@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace PlanetsideSeaState.Data.Repositories
 {
@@ -13,12 +14,14 @@ namespace PlanetsideSeaState.Data.Repositories
     {
         private readonly IDbContextHelper _dbContextHelper;
         private readonly IDbHelper _dbHelper;
+        private readonly ILogger<EventRepository> _logger;
         private readonly IDataReader<FacilityControlInfo> _controlDataReader;
 
-        public EventRepository(IDbContextHelper dbContextHelper, IDbHelper dbHelper, IDataReader<FacilityControlInfo> controlDataReader)
+        public EventRepository(IDbContextHelper dbContextHelper, IDbHelper dbHelper, IDataReader<FacilityControlInfo> controlDataReader, ILogger<EventRepository> logger)
         {
             _dbContextHelper = dbContextHelper;
             _dbHelper = dbHelper;
+            _logger = logger;
             _controlDataReader = controlDataReader ?? throw new ArgumentNullException(nameof(controlDataReader));
         }
 
@@ -159,8 +162,96 @@ namespace PlanetsideSeaState.Data.Repositories
                                                  && e.WorldId == worldId)
                                         .FirstOrDefaultAsync();
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError($"Error in GetFacilityControl: {ex}");
+                return null;
+            }
+        }
+
+        public async Task<IEnumerable<PlayerFacilityControl>> GetFacilityControlAttributedPlayers(Guid id)
+        {
+            using var factory = _dbContextHelper.GetFactory();
+            var dbContext = factory.GetDbContext();
+
+            try
+            {
+                var facilityControl = await dbContext.FacilityControls.FirstOrDefaultAsync(e => e.Id == id);
+                
+                if (facilityControl == null)
+                {
+                    return null;
+                }
+
+                return await dbContext.PlayerFacilityControls
+                                        .Where(e => e.FacilityId == facilityControl.FacilityId
+                                                 && e.Timestamp == facilityControl.Timestamp
+                                                 && e.WorldId == facilityControl.WorldId)
+                                        .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error in GetFacilityControlWithAttributedPlayers(Guid): {ex}");
+                return null;
+            }
+        }
+
+        public async Task<IEnumerable<PlayerFacilityControl>> GetFacilityControlAttributedPlayers(int facilityId, DateTime timestamp, short worldId)
+        {
+            using var factory = _dbContextHelper.GetFactory();
+            var dbContext = factory.GetDbContext();
+
+            try
+            {
+                return await dbContext.PlayerFacilityControls
+                                        .Where(e => e.FacilityId == facilityId
+                                                 && e.Timestamp == timestamp
+                                                 && e.WorldId == worldId)
+                                        .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error in GetFacilityControlAttributedPlayers(int, DateTime, short): {ex}");
+                return null;
+            }
+        }
+
+        public async Task<FacilityControl> GetFacilityControlWithAttributedPlayers(Guid id)
+        {
+            using var factory = _dbContextHelper.GetFactory();
+            var dbContext = factory.GetDbContext();
+
+            try
+            {
+                return await dbContext.FacilityControls
+                                        .Where(e => e.Id == id)
+                                        .Include("PlayerControls")
+                                        .FirstOrDefaultAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error in GetFacilityControlWithAttributedPlayers(Guid): {ex}");
+                return null;
+            }
+        }
+
+        public async Task<FacilityControl> GetFacilityControlWithAttributedPlayers(int facilityId, DateTime timestamp, short worldId)
+        {
+            using var factory = _dbContextHelper.GetFactory();
+            var dbContext = factory.GetDbContext();
+
+            try
+            {
+                return await dbContext.FacilityControls
+                                        .Where(e => e.FacilityId == facilityId
+                                                 && e.Timestamp == timestamp
+                                                 && e.WorldId == worldId)
+                                        .Include("PlayerControls")
+                                        .FirstOrDefaultAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error in GetFacilityControlWithAttributedPlayers(int, DateTime, short): {ex}");
                 return null;
             }
         }

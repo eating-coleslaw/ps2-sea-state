@@ -26,6 +26,6 @@ namespace PlanetsideSeaState.Data.Models.Events
         public uint ZoneId { get; set; }
         public short WorldId { get; set; }
 
-        public IEnumerable<PlayerFacilityControl> PlayerControls { get; set; }
+        public ICollection<PlayerFacilityControl> PlayerControls { get; set; }
     }
 }

@@ -28,6 +28,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="SQL\Functions\GetFacilityControlAttributedPlayers.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="SQL\Functions\GetRecentFacilityControls.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

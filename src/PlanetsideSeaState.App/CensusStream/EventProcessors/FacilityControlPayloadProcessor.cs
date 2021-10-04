@@ -49,19 +49,10 @@ namespace PlanetsideSeaState.App.CensusStream.EventProcessors
 
             try
             {
-
-                //var controlType = GetFacilityControlType(oldFactionId, newFactionId);
-
-                //if (!controlType.HasValue)
-                //{
-                //    return;
-                //}
-
                 var dataModel = new FacilityControl
                 {
                     Timestamp = payload.Timestamp,
                     FacilityId = payload.FacilityId,
-                    //ControlType = controlType.Value,
                     IsCapture = payload.NewFactionId != payload.OldFactionId,
                     NewFactionId = payload.NewFactionId,
                     OldFactionId = payload.OldFactionId,
@@ -83,34 +74,6 @@ namespace PlanetsideSeaState.App.CensusStream.EventProcessors
                 _logger.LogError($"Error processing FacilityControl payload: {ex}");
 
                 return;
-            }
-        }
-
-        private static FacilityControlType? GetFacilityControlType(int? oldFactionId, int? newFactionId)
-        {
-            if (oldFactionId != null && (int)oldFactionId < 0)
-            {
-                throw new ArgumentException($"{oldFactionId} is not a valid value for oldFactionId");
-            }
-
-            if (newFactionId != null && (int)newFactionId < 0)
-            {
-                throw new ArgumentException($"{newFactionId} is not a valid value for newFactionId");
-            }
-
-            if (newFactionId == null || newFactionId == 0)
-            {
-                return null;
-            }
-            else if (oldFactionId == null || oldFactionId == 0)
-            {
-                return FacilityControlType.Capture;
-            }
-            else
-            {
-                return oldFactionId == newFactionId
-                            ? FacilityControlType.Defense
-                            : FacilityControlType.Capture;
             }
         }
 

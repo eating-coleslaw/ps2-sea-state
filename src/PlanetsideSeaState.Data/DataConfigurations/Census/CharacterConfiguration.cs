@@ -14,6 +14,7 @@ namespace PlanetsideSeaState.Data.DataConfigurations.Census
 
             builder.Property(e => e.PrestigeLevel).HasDefaultValue(0);
 
+            builder.Ignore(e => e.IsOnline);
             builder.Ignore(e => e.OutfitMember);
         }
     }

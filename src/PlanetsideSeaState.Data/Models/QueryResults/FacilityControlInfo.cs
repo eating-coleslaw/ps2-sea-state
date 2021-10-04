@@ -10,7 +10,6 @@ namespace PlanetsideSeaState.Data.Models.QueryResults
         public DateTime Timestamp { get; set; }
         public string FacilityName { get; set; }
 
-        //public FacilityControlType ControlType { get; set; }
         public bool IsCapture { get; set; }
 
         public short? OldFactionId { get; set; }

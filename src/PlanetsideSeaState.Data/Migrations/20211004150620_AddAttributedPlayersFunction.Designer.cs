@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PlanetsideSeaState.Data;
@@ -9,9 +10,10 @@ using PlanetsideSeaState.Data;
 namespace PlanetsideSeaState.Data.Migrations
 {
     [DbContext(typeof(PlanetmansDbContext))]
-    partial class PlanetmansDbContextModelSnapshot : ModelSnapshot
+    [Migration("20211004150620_AddAttributedPlayersFunction")]
+    partial class AddAttributedPlayersFunction
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

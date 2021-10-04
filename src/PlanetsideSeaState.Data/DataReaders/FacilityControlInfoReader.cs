@@ -16,7 +16,6 @@ namespace PlanetsideSeaState.Data.DataReaders
             control.WorldId = reader.GetInt16("world_id");
             control.Timestamp = reader.GetDateTime("timestamp");
             control.FacilityName = reader.GetString("facility_name");
-            //control.ControlType = (FacilityControlType)reader.GetInt32("control_type");
             control.IsCapture = reader.GetBoolean("is_capture");
             control.OldFactionId = reader.GetInt16("old_faction_id");
             control.NewFactionId = reader.GetInt16("new_faction_id");
