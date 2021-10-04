@@ -7,7 +7,7 @@
     Id uuid,
     Facility_Id int,
     World_Id smallint,
-    "timestamp" timestamp without time zone,
+    "Timestamp" timestamp without time zone,
     Facility_Name text,
     Is_Capture boolean,
     Old_Faction_Id smallint,

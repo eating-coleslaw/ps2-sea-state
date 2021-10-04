@@ -46,6 +46,16 @@ namespace PlanetsideSeaState.Data
             return (decimal?)reader.GetFloat(field);
         }
 
+        public static int? GetNullableInt32(this NpgsqlDataReader reader, string field)
+        {
+            if (reader.IsDBNull(field))
+            {
+                return null;
+            }
+
+            return reader.GetInt32(field);
+        }
+
         /// <summary>
         /// Get a <see cref="uint"/> from a column
         /// </summary>

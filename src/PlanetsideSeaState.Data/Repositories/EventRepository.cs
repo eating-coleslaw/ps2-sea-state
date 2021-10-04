@@ -16,13 +16,21 @@ namespace PlanetsideSeaState.Data.Repositories
         private readonly IDbHelper _dbHelper;
         private readonly ILogger<EventRepository> _logger;
         private readonly IDataReader<FacilityControlInfo> _controlDataReader;
+        private readonly IDataReader<PlayerConnectionEvent> _playerConnectionDataReader;
 
-        public EventRepository(IDbContextHelper dbContextHelper, IDbHelper dbHelper, IDataReader<FacilityControlInfo> controlDataReader, ILogger<EventRepository> logger)
+        public EventRepository(
+            IDbContextHelper dbContextHelper,
+            IDbHelper dbHelper,
+            IDataReader<FacilityControlInfo> controlDataReader,
+            IDataReader<PlayerConnectionEvent> playerConnectionDataReader,
+            ILogger<EventRepository> logger
+        )
         {
             _dbContextHelper = dbContextHelper;
             _dbHelper = dbHelper;
             _logger = logger;
             _controlDataReader = controlDataReader ?? throw new ArgumentNullException(nameof(controlDataReader));
+            _playerConnectionDataReader = playerConnectionDataReader ?? throw new ArgumentNullException(nameof(playerConnectionDataReader));
         }
 
         // Credit to Lampjaw
@@ -169,6 +177,22 @@ namespace PlanetsideSeaState.Data.Repositories
             }
         }
 
+        public async Task<FacilityControl> GetFacilityControlAsync(Guid id)
+        {
+            using var factory = _dbContextHelper.GetFactory();
+            var dbContext = factory.GetDbContext();
+
+            try
+            {
+                return await dbContext.FacilityControls.FirstOrDefaultAsync(e => e.Id == id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error in GetFacilityControlWithAttributedPlayers(Guid): {ex}");
+                return null;
+            }
+        }
+
         public async Task<IEnumerable<PlayerFacilityControl>> GetFacilityControlAttributedPlayers(Guid id)
         {
             using var factory = _dbContextHelper.GetFactory();
@@ -263,10 +287,27 @@ namespace PlanetsideSeaState.Data.Repositories
             using NpgsqlCommand cmd = await _dbHelper.CreateTextCommand(connection, @"SELECT * FROM GetRecentFacilityControls(@worldId, @facilityId, @rowLimit);");
 
             cmd.AddParameter("worldId", worldId);
-            cmd.AddParameter("@facilityId", facilityId);
-            cmd.AddParameter("@rowLimit", rowLimit);
+            cmd.AddParameter("facilityId", facilityId);
+            cmd.AddParameter("rowLimit", rowLimit);
 
             IEnumerable<FacilityControlInfo> events = await _controlDataReader.ReadList(cmd);
+            await connection.CloseAsync();
+
+            return events;
+        }
+        
+        public async Task<IEnumerable<PlayerConnectionEvent>> GetPlayerConnectionEventsAsync(DateTime start, DateTime end, short worldId, uint? zoneId)
+        {
+            using NpgsqlConnection connection = _dbHelper.CreateConnection();
+            
+            using NpgsqlCommand cmd = await _dbHelper.CreateTextCommand(connection, @"SELECT * FROM GetPlayerConnectionEvents(@start, @end, @worldId, @zoneId);");
+
+            cmd.AddParameter("start", start);
+            cmd.AddParameter("end", end);
+            cmd.AddParameter("worldId", worldId);
+            cmd.AddParameter("zoneId", zoneId);
+
+            IEnumerable<PlayerConnectionEvent> events = await _playerConnectionDataReader.ReadList(cmd);
             await connection.CloseAsync();
 
             return events;

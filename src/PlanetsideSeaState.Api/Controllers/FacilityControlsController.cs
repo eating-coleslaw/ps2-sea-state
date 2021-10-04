@@ -43,6 +43,25 @@ namespace PlanetsideSeaState.Api.Controllers
             return await _eventRepository.GetFacilityControlAttributedPlayers(id);
         }
 
+        // GET api/<FacilityControlController>/events/c9c71fcc-435b-46b0-b840-10b196915a17
+        [HttpGet("events/{id}")]
+        public async Task<IEnumerable<PlayerConnectionEvent>> GetFacilityControlPlayerConnectionEvents(Guid id)
+        {
+            var facilityControl = await _eventRepository.GetFacilityControlAsync(id);
+
+            if (facilityControl == null)
+            {
+                return null;
+            }
+
+            var endTime = facilityControl.Timestamp;
+            var startTime = endTime - TimeSpan.FromMinutes(5);
+            var worldId = facilityControl.WorldId;
+            var zoneId = facilityControl.ZoneId;
+            
+            return await _eventRepository.GetPlayerConnectionEventsAsync(startTime, endTime, worldId, zoneId);
+        }
+
         // DELETE api/<FacilityControlController>/5
         [HttpDelete("{id}")]
         public void Delete(int id)

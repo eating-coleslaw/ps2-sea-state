@@ -48,6 +48,7 @@ namespace PlanetsideSeaState.Data
             services.AddSingleton<ICharacterRepository, CharacterRepository>();
 
             services.AddSingleton<IDataReader<FacilityControlInfo>, FacilityControlInfoReader>();
+            services.AddSingleton<IDataReader<PlayerConnectionEvent>, PlayerConnectionEventReader>();
 
             return services;
         }
