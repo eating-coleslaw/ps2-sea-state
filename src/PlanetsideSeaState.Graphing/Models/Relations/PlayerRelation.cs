@@ -1,5 +1,6 @@
-﻿using PlanetsideSeaState.App.CensusStream.Models;
+﻿//using PlanetsideSeaState.App.CensusStream.Models;
 using PlanetsideSeaState.Graphing.Models.Nodes;
+using PlanetsideSeaState.Shared.Planetside;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,6 +1,6 @@
 ﻿// Credit to Lampjaw
 
-namespace PlanetsideSeaState.App.Models
+namespace PlanetsideSeaState.Shared.Planetside
 {
     public class ZoneRegionOwnership
     {

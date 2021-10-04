@@ -1,4 +1,4 @@
-﻿using PlanetsideSeaState.App;
+﻿using PlanetsideSeaState.Shared;
 using System.Threading.Tasks;
 
 namespace PlanetsideSeaState.Graphing.Services.FacilityPopsGraph

@@ -5,8 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PlanetsideSeaState.App\PlanetsideSeaState.App.csproj" />
+    <ProjectReference Include="..\PlanetsideSeaState.CensusStore\PlanetsideSeaState.CensusStore.csproj" />
     <ProjectReference Include="..\PlanetsideSeaState.Data\PlanetsideSeaState.Data.csproj" />
+    <ProjectReference Include="..\PlanetsideSeaState.Shared\PlanetsideSeaState.Shared.csproj" />
   </ItemGroup>
 
 </Project>

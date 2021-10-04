@@ -15,6 +15,8 @@ namespace PlanetsideSeaState.Graphing.Models.Nodes
         public short FactionId { get; }
         public string Name { get; }
 
+        public short? TeamId { get; set; } // Faction the player is playing on (for NSO characters)
+
         public uint ZoneId { get; set; }
         public DateTime LastSeen { get; private set; }
 
@@ -33,14 +35,24 @@ namespace PlanetsideSeaState.Graphing.Models.Nodes
 
         // TODO: add Player Expiration Timer
 
+        public PlayerNode(string id, string name, short factionId, DateTime lastSeen, uint zoneId, short? teamId)
+        {
+            Id = id;
+            Name = name;
+            FactionId = factionId;
+            LastSeen = lastSeen;
+            ZoneId = zoneId;
+            TeamId = teamId;
+        }
 
-        public PlayerNode(Character character, DateTime lastSeen, uint zoneId)
+        public PlayerNode(Character character, DateTime lastSeen, uint zoneId, short? teamId = null)
         {
             Id = character.Id;
             FactionId = character.FactionId;
             Name = character.Name;
             LastSeen = lastSeen;
             ZoneId = zoneId;
+            TeamId = teamId;
         }
 
         public void UpdateLocation(PlayerZoneUpdate update)

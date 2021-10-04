@@ -1,4 +1,6 @@
-﻿namespace PlanetsideSeaState.App.CensusStream
+﻿using PlanetsideSeaState.Shared;
+
+namespace PlanetsideSeaState.App.CensusStream
 {
     public interface IWebsocketMonitor : IStatefulHostedService
     {

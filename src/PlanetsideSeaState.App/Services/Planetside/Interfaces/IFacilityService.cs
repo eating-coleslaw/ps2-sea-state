@@ -1,7 +1,7 @@
 ﻿using PlanetsideSeaState.Data.Models.Census;
-using PlanetsideSeaState.App.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using PlanetsideSeaState.Shared.Planetside;
 
 namespace PlanetsideSeaState.App.Services.Planetside
 {

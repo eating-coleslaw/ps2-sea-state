@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using PlanetsideSeaState.App;
 using PlanetsideSeaState.Shared;
 using System;
 using System.Collections.Concurrent;

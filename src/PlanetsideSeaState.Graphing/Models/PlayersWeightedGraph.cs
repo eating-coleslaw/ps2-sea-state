@@ -1,4 +1,5 @@
-﻿using PlanetsideSeaState.Graphing.Exceptions;
+﻿using PlanetsideSeaState.Data.Models.QueryResults;
+using PlanetsideSeaState.Graphing.Exceptions;
 using PlanetsideSeaState.Graphing.Models.Events;
 using PlanetsideSeaState.Graphing.Models.Nodes;
 using PlanetsideSeaState.Shared;
@@ -61,7 +62,24 @@ namespace PlanetsideSeaState.Graphing.Models
             }
         }
 
+        public PlayersWeightedGraph(IEnumerable<PlayerNode> playerNodes, IEnumerable<PlayerConnectionEvent> connectionEvents)
+        {
+            foreach (var node in playerNodes)
+            {
+                AddNode(node);
+            }
 
+            foreach (var connectionEvent in connectionEvents)
+            {
+                var lhsNode = GetPlayerNode(connectionEvent.ActingCharacterId);
+                var rhsNode = GetPlayerNode(connectionEvent.RecipientCharacterId);
+
+                if (lhsNode != null && rhsNode != null)
+                {
+                    AddOrUpdateRelation(lhsNode, rhsNode, connectionEvent);
+                }
+            }
+        }
 
         public bool AddNode(PlayerNode playerNode)
         {
@@ -138,7 +156,64 @@ namespace PlanetsideSeaState.Graphing.Models
             }
         }
 
+        #region PlayerConnectionEvent
+        public void AddOrUpdateRelation(PlayerNode lhsPlayerNode, PlayerNode rhsPlayerNode, PlayerConnectionEvent connectionEvent)
+        {
+            AddOrUpdateSingleRelationInternal(lhsPlayerNode, rhsPlayerNode, connectionEvent);
+            AddOrUpdateSingleRelationInternal(rhsPlayerNode, lhsPlayerNode, connectionEvent);
+        }
 
+        private void AddOrUpdateSingleRelationInternal(PlayerNode parent, PlayerNode child, PlayerConnectionEvent connectionEvent)
+        {
+            if (parent.TryGetConnection(child, out PlayerEdge connection))
+            {
+                connection.TryUpdate(connectionEvent);
+            }
+            else
+            {
+                connection = new PlayerEdge(parent, child, connectionEvent);
+
+                connection.ExpirationReached += async (s, e) => await OnConnectionExpiredEvent(s, e);
+
+                parent.AddEdge(connection);
+
+                PlayerConnections.TryGetValue(parent, out HashSet<PlayerEdge> connectionSet);
+                connectionSet?.Add(connection);
+            }
+        }
+
+        public async Task AddOrUpdateRelationAsync(PlayerNode lhsPlayerNode, PlayerNode rhsPlayerNode, PlayerConnectionEvent connectionEvent)
+        {
+            await Task.WhenAll(
+                AddOrUpdateSingleRelationInternalAsync(lhsPlayerNode, rhsPlayerNode, connectionEvent),
+                AddOrUpdateSingleRelationInternalAsync(rhsPlayerNode, lhsPlayerNode, connectionEvent)
+            );
+        }
+
+        private async Task AddOrUpdateSingleRelationInternalAsync(PlayerNode parent, PlayerNode child, PlayerConnectionEvent connectionEvent)
+        {
+            using (await _keyedSemaphore.WaitAsync($"{parent.Id}"))
+            {
+                if (parent.TryGetConnection(child, out PlayerEdge connection))
+                {
+                    connection.TryUpdate(connectionEvent);
+                }
+                else
+                {
+                    connection = new PlayerEdge(parent, child, connectionEvent);
+
+                    connection.ExpirationReached += async (s, e) => await OnConnectionExpiredEvent(s, e);
+
+                    parent.AddEdge(connection);
+
+                    PlayerConnections.TryGetValue(parent, out HashSet<PlayerEdge> connectionSet);
+                    connectionSet?.Add(connection);
+                }
+            }
+        }
+        #endregion PlayerConnectionEvent
+
+        #region PlayerRelationEvent
         public void AddOrUpdateRelation(PlayerNode lhsPlayerNode, PlayerNode rhsPlayerNode, PlayerRelationEvent relationEvent)
         {
             if (!relationEvent.ZoneId.HasValue)
@@ -204,6 +279,7 @@ namespace PlanetsideSeaState.Graphing.Models
                 }
             }
         }
+        #endregion PlayerRelationEvent
 
         public async Task RemoveConnectionAsync(PlayerNode lhsPlayerNode, PlayerNode rhsPlayerNode)
         {

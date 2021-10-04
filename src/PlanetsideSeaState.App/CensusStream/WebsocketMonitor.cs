@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using PlanetsideSeaState.App.CensusStream.Models;
+using PlanetsideSeaState.Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;

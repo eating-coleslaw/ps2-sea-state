@@ -1,6 +1,6 @@
-﻿using PlanetsideSeaState.App.CensusStream.Models;
-using PlanetsideSeaState.Data.Models.Census;
+﻿using PlanetsideSeaState.Data.Models.Census;
 using PlanetsideSeaState.Data.Models.Events;
+using PlanetsideSeaState.Shared.Planetside;
 using System;
 
 namespace PlanetsideSeaState.Graphing.Models.Events

@@ -1,9 +1,13 @@
 ﻿using Microsoft.Extensions.Logging;
-using PlanetsideSeaState.App;
-using PlanetsideSeaState.App.Services.Planetside;
+//using PlanetsideSeaState.App;
+//using PlanetsideSeaState.App.Services.Planetside;
+using PlanetsideSeaState.CensusStore.Services;
+using PlanetsideSeaState.Data.Repositories;
 using PlanetsideSeaState.Graphing.Models;
 using PlanetsideSeaState.Graphing.Models.Events;
 using PlanetsideSeaState.Graphing.Models.Nodes;
+using PlanetsideSeaState.Shared;
+using PlanetsideSeaState.Shared.Planetside;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -15,7 +19,8 @@ namespace PlanetsideSeaState.Graphing.Services.FacilityPopsGraph
 {
     public class FacilityPopGraphService : StatefulService, IDisposable
     {
-        private readonly IFacilityService _facilityService;
+        private readonly IFacilityRepository _facilityRepository;
+        private readonly IFacilityStore _facilityStore;
         private readonly ILogger<FacilityPopGraphService> _logger;
 
 
@@ -44,9 +49,10 @@ namespace PlanetsideSeaState.Graphing.Services.FacilityPopsGraph
         private bool _disposedValue;
 
 
-        public FacilityPopGraphService(IFacilityService facilityService, ILogger<FacilityPopGraphService> logger)
+        public FacilityPopGraphService(IFacilityRepository facilityRepository, IFacilityStore facilityStore, ILogger<FacilityPopGraphService> logger)
         {
-            _facilityService = facilityService;
+            _facilityRepository = facilityRepository;
+            _facilityStore = facilityStore;
             _logger = logger;
         }
 
@@ -108,8 +114,8 @@ namespace PlanetsideSeaState.Graphing.Services.FacilityPopsGraph
 
         private async Task SeedFacilityNodes()
         {
-            var mapRegionsTask = _facilityService.GetMapRegionsByZoneIdAsync(ZoneId);
-            var regionOwnershipTask = _facilityService.GetMapOwnership(WorldId, ZoneId);
+            var mapRegionsTask = _facilityRepository.GetMapRegionsByZoneIdAsync(ZoneId);
+            var regionOwnershipTask = GetMapOwnership(WorldId, ZoneId);
 
             var taskList = new List<Task>
             {
@@ -138,13 +144,20 @@ namespace PlanetsideSeaState.Graphing.Services.FacilityPopsGraph
 
         private async Task SeedFacilityConnections()
         {
-            var facilityLinks = await _facilityService.GetFacilityLinksByZoneIdAsync(ZoneId);
+            var facilityLinks = await _facilityRepository.GetFacilityLinksByZoneIdAsync(ZoneId);
 
             foreach (var link in facilityLinks)
             {
                 //FacilityGraph.AddConnection(link.FacilityIdA, link.FacilityIdB);
                 FacilityPopGraph.AddFacilityConnection(link.FacilityIdA, link.FacilityIdB);
             }
+        }
+
+        private async Task<IEnumerable<ZoneRegionOwnership>> GetMapOwnership(short worldId, uint zoneId)
+        {
+            var mapOwnership = await _facilityStore.GetMapOwnershipAsync(worldId, zoneId);
+
+            return mapOwnership?.Select(o => new ZoneRegionOwnership(o.Key, o.Value));
         }
         #endregion Facility Graph Seeding
 

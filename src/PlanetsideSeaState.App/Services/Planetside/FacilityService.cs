@@ -1,10 +1,10 @@
 ﻿using PlanetsideSeaState.CensusStore.Services;
 using PlanetsideSeaState.Data.Models.Census;
 using Microsoft.Extensions.Logging;
-using PlanetsideSeaState.App.Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using PlanetsideSeaState.Shared.Planetside;
 
 namespace PlanetsideSeaState.App.Services.Planetside
 {

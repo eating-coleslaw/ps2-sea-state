@@ -1,6 +1,6 @@
 ﻿// Credit to Lampjaw
 
-namespace PlanetsideSeaState.App.Models
+namespace PlanetsideSeaState.Shared
 {
     public class ServiceState
     {

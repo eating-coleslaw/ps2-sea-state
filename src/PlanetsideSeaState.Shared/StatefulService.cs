@@ -1,8 +1,7 @@
-﻿using PlanetsideSeaState.App.Models;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 
-namespace PlanetsideSeaState.App
+namespace PlanetsideSeaState.Shared
 {
     public abstract class StatefulService : IStatefulService
     {

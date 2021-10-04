@@ -1,6 +1,7 @@
-﻿using PlanetsideSeaState.App.CensusStream.Models;
+﻿using PlanetsideSeaState.Data.Models.QueryResults;
 using PlanetsideSeaState.Graphing.Models.Events;
 using PlanetsideSeaState.Graphing.Models.Nodes;
+using PlanetsideSeaState.Shared.Planetside;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,6 +42,19 @@ namespace PlanetsideSeaState.Graphing
 
             ExpirationTimer = new Timer(OnExpirationReached, null, Lifetime, System.Threading.Timeout.Infinite);
         }
+        
+        public PlayerEdge(PlayerNode parent, PlayerNode child, PlayerConnectionEvent connectionEvent, int lifetimeMinutes = 5)
+        {
+            Parent = parent;
+            Child = child;
+            LastUpdate = connectionEvent.Timestamp;
+            EventType = connectionEvent.EventType;
+            ExperienceId = connectionEvent.ExperienceId;
+            ZoneId = connectionEvent.ZoneId;
+            Lifetime = lifetimeMinutes * 60 * 1000;
+
+            ExpirationTimer = new Timer(OnExpirationReached, null, Lifetime, System.Threading.Timeout.Infinite);
+        }
 
         public PlayerEdge(PlayerNode parent, PlayerNode child, DateTime timestamp, PayloadEventType eventType, uint zoneId, int? experienceId, int lifetimeMinutes = 5)
         {
@@ -74,6 +88,31 @@ namespace PlanetsideSeaState.Graphing
             EventType = relationEvent.EventType;
             ZoneId = relationEvent.ZoneId;
             ExperienceId = relationEvent.ExperienceId;
+
+            _autoEvent.Set();
+
+            return true;
+        }
+
+        public bool TryUpdate(PlayerConnectionEvent connectionEvent)
+        {
+            if (_isExpiring)
+            {
+                return false;
+            }
+
+            _autoEvent.WaitOne();
+
+            if (LastUpdate >= connectionEvent.Timestamp)
+            {
+                _autoEvent.Set();
+                return false;
+            }
+
+            LastUpdate = connectionEvent.Timestamp;
+            EventType = connectionEvent.EventType;
+            ZoneId = connectionEvent.ZoneId;
+            ExperienceId = connectionEvent.ExperienceId;
 
             _autoEvent.Set();
 
