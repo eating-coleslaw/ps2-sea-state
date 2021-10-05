@@ -39,6 +39,7 @@ BEGIN
         AND death."Timestamp" BETWEEN i_timestamp_start AND i_timestamp_end
         AND (i_worldId IS NULL OR death."WorldId" = i_worldId)
         AND (i_zoneId IS NULL OR death."ZoneId" = i_zoneId)
+        AND death."AttackerFactionId" IS NOT NULL
 
     UNION
 

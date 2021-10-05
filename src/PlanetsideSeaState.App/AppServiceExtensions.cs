@@ -6,6 +6,7 @@ using PlanetsideSeaState.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using PlanetsideSeaState.App.Services.Graphing;
 
 namespace PlanetsideSeaState.App
 {
@@ -25,6 +26,8 @@ namespace PlanetsideSeaState.App
             services.AddCensusStoreServices();
             services.AddCensusStores(configuration);
             services.AddCensusStreamServices(configuration);
+
+            services.AddTransient<IFacilityControlPopulationService, FacilityControlPopulationService>();
 
             return services;
         }

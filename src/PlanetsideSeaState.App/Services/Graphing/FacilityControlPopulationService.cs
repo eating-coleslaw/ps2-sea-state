@@ -6,7 +6,9 @@ using PlanetsideSeaState.Graphing.Models.Nodes;
 using PlanetsideSeaState.Shared.Constants;
 using PlanetsideSeaState.Shared.Planetside;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,7 +19,25 @@ namespace PlanetsideSeaState.App.Services.Graphing
     {
         private readonly IEventRepository _eventRepository;
 
-        private PlayersWeightedGraph Graph { get; set; }
+        private PlayersWeightedGraph Graph { get; set; } = new();
+
+        // This is intended to act as a concurrent HashSet. The value type is byte because it's a small value type
+        private ConcurrentDictionary<PlayerNode, byte> VisitedPlayers { get; set; } = new();
+        private ConcurrentDictionary<PlayerNode, byte> AttributedPlayerNodes { get; set; } = new();
+
+        private readonly int MaxSearchDepth = 10;
+        private readonly TimeSpan MaxEventTimeSpan = TimeSpan.FromMinutes(1);
+
+        private int Total { get; set; }
+        private int Vs { get; set; }
+        private int Nc { get; set; }
+        private int Tr { get; set; }
+        private int Unknown { get; set; }
+        private int Nso { get; set; }
+        private int Nso_Vs { get; set; }
+        private int Nso_Nc { get; set; }
+        private int Nso_Tr { get; set; }
+        private int Nso_Unknown { get; set; }
 
         public FacilityControlPopulationService(IEventRepository eventRepository)
         {
@@ -26,6 +46,9 @@ namespace PlanetsideSeaState.App.Services.Graphing
 
         public async Task<FacilityControlPopulations> GetFacilityControlPopulationsAsync(Guid facilityControlId)
         {
+            Stopwatch stopWatch = new();
+            stopWatch.Start();
+
             // 1. get Facility Control info
             // 2. get Attributed Players info
             var facilityControl = await _eventRepository.GetFacilityControlWithAttributedPlayers(facilityControlId);
@@ -37,6 +60,16 @@ namespace PlanetsideSeaState.App.Services.Graphing
 
             var populations = new FacilityControlPopulations(facilityControl);
 
+            // If there are no attributed players, then all population counts will be zero
+            var attributedPlayers = facilityControl.PlayerControls;
+            if (attributedPlayers.Count == 0)
+            {
+                stopWatch.Stop();
+                populations.ElapsedMilliseconds = stopWatch.ElapsedMilliseconds;
+
+                return populations;
+            }
+
             var endTime = facilityControl.Timestamp;
             var startTime = endTime - TimeSpan.FromMinutes(5);
             var worldId = facilityControl.WorldId;
@@ -45,9 +78,29 @@ namespace PlanetsideSeaState.App.Services.Graphing
             // 3. get Player Connection Events
             var playerEvents = await _eventRepository.GetPlayerConnectionEventsAsync(startTime, endTime, worldId, zoneId);
 
+            populations.SearchBaseStartTime = startTime;
+            populations.SearchBaseEndTime = endTime;
+
+            Dictionary<PayloadEventType, int> eventTypeCounts = new();
+
             // 4. loop through Player Connection Events to populate the Graph
             foreach (var ev in playerEvents)
             {
+                if (string.IsNullOrWhiteSpace(ev.ActingCharacterId) || string.IsNullOrWhiteSpace(ev.RecipientCharacterId))
+                {
+                    continue;
+                }
+
+                populations.SearchBasePlayerEvents++;
+                if (!eventTypeCounts.ContainsKey(ev.EventType))
+                {
+                    eventTypeCounts.Add(ev.EventType, 1);
+                }
+                else
+                {
+                    eventTypeCounts[ev.EventType] += 1;
+                }
+
                 GetOrCreatePlayerNodes(ev, out PlayerNode actingNode, out PlayerNode recipientNode);
                 
                 // Update the teamId field, if possible from this player connection event
@@ -55,12 +108,16 @@ namespace PlanetsideSeaState.App.Services.Graphing
                 {
                     // If either character is not NSO, update their team IDs.
                     // Only update NSO team IDs from non-NSO characters, to prevent propagating bad team ID values
-                    if (actingNode.FactionId == Faction.NSO && recipientNode.FactionId != Faction.NSO && actingNode.TeamId.Value != recipientNode.FactionId)
+                    if (actingNode.FactionId == Faction.NSO
+                        && recipientNode.FactionId != Faction.NSO
+                        && (!actingNode.TeamId.HasValue || actingNode.TeamId.Value != recipientNode.FactionId))
                     {
                         actingNode.TeamId = recipientNode.FactionId;
                     }
 
-                    if (recipientNode.FactionId == Faction.NSO && actingNode.FactionId != Faction.NSO && recipientNode.TeamId.Value != actingNode.FactionId)
+                    if (recipientNode.FactionId == Faction.NSO
+                        && actingNode.FactionId != Faction.NSO
+                        && (!recipientNode.TeamId.HasValue || recipientNode.TeamId.Value != actingNode.FactionId))
                     {
                         recipientNode.TeamId = actingNode.FactionId;
                     }
@@ -69,10 +126,151 @@ namespace PlanetsideSeaState.App.Services.Graphing
                 Graph.AddOrUpdateRelation(actingNode, recipientNode, ev);
             }
 
-            // 5. search through the Graph to get the population counts
+            // 4.5 get all PlayerNodes for attributed players
+            foreach (var player in attributedPlayers)
+            {
+                var playerNode = Graph.GetPlayerNode(player.CharacterId);
+                
+                // The player contributed to the facility control in a manner we don't track
+                if (playerNode == null)
+                {
+                    playerNode = new PlayerNode(player.CharacterId, string.Empty, facilityControl.NewFactionId, facilityControl.Timestamp, facilityControl.ZoneId, facilityControl.NewFactionId);
+                }
 
+                playerNode.TeamId = facilityControl.NewFactionId;
+
+                //VisitedPlayers.TryAdd(playerNode, 0);
+                AttributedPlayerNodes.TryAdd(playerNode, 0);
+            }
+
+            // 5. search through the Graph to get the population counts
+            foreach (var entry in AttributedPlayerNodes)
+            {
+                var playerNode = entry.Key;
+                var localVisitedPlayers = new ConcurrentDictionary<PlayerNode, byte>();
+
+                SearchGraph(playerNode, 0, facilityControl.Timestamp, localVisitedPlayers);
+            }
+
+            populations.TotalPlayers = Total;
+            populations.FactionPlayers["VS"] = Vs;
+            populations.FactionPlayers["NC"] = Nc;
+            populations.FactionPlayers["TR"] = Tr;
+            populations.FactionPlayers["Unknown"] = Unknown;
+
+            populations.NsoPlayers = Nso;
+            populations.NsoFactionPlayers["VS"] = Nso_Vs;
+            populations.NsoFactionPlayers["NC"] = Nso_Nc;
+            populations.NsoFactionPlayers["TR"] = Nso_Tr;
+            populations.NsoFactionPlayers["Unknown"] = Nso_Unknown;
+            
+            //populations.Vs = Vs;
+            //populations.Nc = Nc;
+            //populations.Tr = Tr;
+            //populations.Uknown = Unknown;
+            //populations.Nso = Nso;
+            //populations.Nso_Vs = Nso_Vs;
+            //populations.Nso_Nc = Nso_Nc;
+            //populations.Nso_Tr = Nso_Tr;
+            //populations.Nso_Unknown = Nso_Unknown;
+
+            populations.SearchBasePlayerEventTypes = new();
+
+            foreach (var typeCount in eventTypeCounts)
+            {
+                var name = Enum.GetName<PayloadEventType>(typeCount.Key);
+                var count = typeCount.Value;
+
+                populations.SearchBasePlayerEventTypes[name] = count;
+            }
+
+            stopWatch.Stop();
+            populations.ElapsedMilliseconds = stopWatch.ElapsedMilliseconds;
 
             return populations;
+        }
+
+        private void SearchGraph(PlayerNode parent, int depth, DateTime baseTimestamp, ConcurrentDictionary<PlayerNode, byte> localVisitedPlayers)
+        {
+            if (!localVisitedPlayers.TryAdd(parent, 0))
+            {
+                return;
+            }
+
+            if (VisitedPlayers.TryAdd(parent, 0))
+            {
+                Total++;
+
+                switch (parent.TeamId)
+                {
+                    case Faction.VS:
+                        Vs++;
+                        if (parent.FactionId == Faction.NSO)
+                        {
+                            Nso_Vs++;
+                            Nso++;
+                        }
+                        break;
+
+                    case Faction.NC:
+                        Nc++;
+                        if (parent.FactionId == Faction.NSO)
+                        {
+                            Nso_Nc++;
+                            Nso++;
+                        }
+                        break;
+
+                    case Faction.TR:
+                        Tr++;
+                        if (parent.FactionId == Faction.NSO)
+                        {
+                            Nso_Tr++;
+                            Nso++;
+                        }
+                        break;
+
+                    default:
+                        Unknown++;
+                        if (parent.FactionId == Faction.NSO)
+                        {
+                            Nso_Unknown++;
+                            Nso++;
+                        }
+                        break;
+                }
+
+                //if (parent.FactionId == Faction.NSO)
+                //{
+                //    Nso++;
+                //}
+            }
+
+            if (depth >= MaxSearchDepth)
+            {
+                return;
+            }
+
+            var connections = parent.ConnectionsSnapshot;
+            foreach (var connection in connections)
+            {
+                var timeDiff = baseTimestamp - connection.LastUpdate;
+                if (timeDiff > MaxEventTimeSpan)
+                {
+                    continue;
+                }
+
+                var childNode = connection.Child;
+
+                // Skip continuing search from attributed players' nodes as they will already be
+                // the starting point for their own graph search.
+                if (AttributedPlayerNodes.ContainsKey(childNode))
+                {
+                    continue;
+                }
+
+                SearchGraph(childNode, depth + 1, baseTimestamp, localVisitedPlayers);
+            }
         }
 
         private void GetOrCreatePlayerNodes(PlayerConnectionEvent ev, out PlayerNode actingNode, out PlayerNode recipientNode)
@@ -85,7 +283,7 @@ namespace PlanetsideSeaState.App.Services.Graphing
                 Graph.AddNode(actingNode);
             }
 
-            recipientNode = Graph.GetPlayerNode(ev.ActingCharacterId);
+            recipientNode = Graph.GetPlayerNode(ev.RecipientCharacterId);
             if (recipientNode == null)
             {
                 var teamId = ev.RecipientFactionId == 4 ? (short?)null : ev.RecipientFactionId;

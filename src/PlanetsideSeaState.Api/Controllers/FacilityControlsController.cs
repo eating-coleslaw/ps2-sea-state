@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using PlanetsideSeaState.App.Models;
+using PlanetsideSeaState.App.Services.Graphing;
 using PlanetsideSeaState.Data.Models.Events;
 using PlanetsideSeaState.Data.Models.QueryResults;
 using PlanetsideSeaState.Data.Repositories;
@@ -16,10 +18,12 @@ namespace PlanetsideSeaState.Api.Controllers
     public class FacilityControlsController : ControllerBase
     {
         private readonly IEventRepository _eventRepository;
+        private readonly IFacilityControlPopulationService _facilityControlPopulationService;
 
-        public FacilityControlsController(IEventRepository eventRepository)
+        public FacilityControlsController(IEventRepository eventRepository, IFacilityControlPopulationService controlPopulationService)
         {
             _eventRepository = eventRepository;
+            _facilityControlPopulationService = controlPopulationService;
         }
 
         // GET: api/FacilityControls/recent?worldId=17&facilityId=224&limit=10
@@ -60,6 +64,12 @@ namespace PlanetsideSeaState.Api.Controllers
             var zoneId = facilityControl.ZoneId;
             
             return await _eventRepository.GetPlayerConnectionEventsAsync(startTime, endTime, worldId, zoneId);
+        }
+
+        [HttpGet("population/{id}")]
+        public async Task<FacilityControlPopulations> GetFacilityControlPopulation(Guid id)
+        {
+            return await _facilityControlPopulationService.GetFacilityControlPopulationsAsync(id);
         }
 
         // DELETE api/<FacilityControlController>/5
