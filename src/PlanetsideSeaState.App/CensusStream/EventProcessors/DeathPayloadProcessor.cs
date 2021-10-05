@@ -39,22 +39,19 @@ namespace PlanetsideSeaState.App.CensusStream.EventProcessors
             bool isValidAttackerId = IsValidCharacterId(attackerId);
             bool isValidVictimId = IsValidCharacterId(victimId);
 
+            // We only care about events that are an interaction between two players
+            if (!isValidAttackerId || !isValidVictimId)
+            {
+                return;
+            }
+
             try
             {
-                Character attackerCharacter = null;
-                Character victimCharacter = null;
-                
-                if (isValidAttackerId == true)
-                {
-                    // Do stuff like look up the Character name, faction, etc.
-                    attackerCharacter = await _characterService.GetCharacter(attackerId);
-                }
+                // Do stuff like look up the Character name, faction, etc.
+                var attackerCharacter = await _characterService.GetCharacter(attackerId);
 
-                if (isValidVictimId == true)
-                {
-                    // Do stuff like look up the Character name, faction, etc.
-                    victimCharacter = await _characterService.GetCharacter(victimId);
-                }
+                // Do stuff like look up the Character name, faction, etc.
+                var victimCharacter = await _characterService.GetCharacter(victimId);
 
                 var dataModel = new Death
                 {

@@ -38,23 +38,17 @@ namespace PlanetsideSeaState.App.CensusStream.EventProcessors
             var isValidAttackerId = IsValidCharacterId(attackerId);
             var isValidVictimId = IsValidCharacterId(victimId);
 
-            // By default, don't track players destroying unclaimed vehicles
-            if (!isValidVictimId)
+            // We only care about events that are an interaction between two players
+            if (!isValidAttackerId || !isValidVictimId)
             {
                 return;
             }
 
             try
             {
-                if (isValidAttackerId)
-                {
-                    // Do stuff like look up the Character name, faction, etc.
-                }
+                // Do stuff like look up the Character name, faction, etc.
 
-                if (isValidVictimId)
-                {
-                    // Do stuff like look up the Character name, faction, etc.
-                }
+                // Do stuff like look up the Character name, faction, etc.
 
                 var dataModel = new VehicleDestruction
                 {

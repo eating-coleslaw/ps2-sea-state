@@ -31,8 +31,10 @@ namespace PlanetsideSeaState.App.CensusStream.EventProcessors
             var experienceId = payload.ExperienceId;
 
             var characterId = payload.CharacterId;
+            var otherId = payload.OtherId;
 
-            if (!IsValidCharacterId(characterId))
+            // We only care about events that are an interaction between two players
+            if (!IsValidCharacterId(characterId) || !IsValidCharacterId(otherId))
             {
                 return;
             }
@@ -46,7 +48,7 @@ namespace PlanetsideSeaState.App.CensusStream.EventProcessors
                     CharacterId = characterId,
                     ExperienceId = payload.ExperienceId,
                     Amount = payload.Amount,
-                    OtherId = payload.OtherId,
+                    OtherId = otherId,
                     LoadoutId = payload.LoadoutId,
                     WorldId = payload.WorldId,
                     ZoneId = payload.ZoneId.Value

@@ -17,7 +17,7 @@ namespace PlanetsideSeaState.App.CensusStream.EventProcessors
 
         protected bool IsValidCharacterId(string characterId)
         {
-            return !string.IsNullOrWhiteSpace(characterId) && characterId.Length > 18;
+            return !string.IsNullOrWhiteSpace(characterId) && characterId.Length > 18 && characterId != "0";
         }
     }
 }
