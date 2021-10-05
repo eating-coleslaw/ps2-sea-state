@@ -35,7 +35,7 @@ BEGIN
            NULL::int AS "ExperienceId",
            death."ZoneId"
       FROM "Death" death
-      WHERE death."AttackerCharacterId" IS NOT NULL
+      WHERE death."AttackerCharacterId" <> '0'
         AND death."Timestamp" BETWEEN i_timestamp_start AND i_timestamp_end
         AND (i_worldId IS NULL OR death."WorldId" = i_worldId)
         AND (i_zoneId IS NULL OR death."ZoneId" = i_zoneId)
