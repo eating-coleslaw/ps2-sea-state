@@ -57,6 +57,7 @@ BEGIN
             OR i_worldId = controls."WorldId")
         AND (i_facilityId IS NULL
             OR i_facilityId = controls."FacilityId")
+        AND regions."FacilityTypeId" <> 7 -- Warpgate
       ORDER BY controls."Timestamp" DESC
       LIMIT CASE WHEN i_rowLimit IS NULL THEN 10
                  ELSE LEAST(i_rowLimit, 100::smallint) END;
