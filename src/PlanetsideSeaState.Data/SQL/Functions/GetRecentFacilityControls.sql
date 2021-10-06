@@ -1,4 +1,6 @@
-﻿CREATE OR REPLACE FUNCTION GetRecentFacilityControls(
+﻿DROP FUNCTION IF EXISTS GetRecentFacilityControls(smallint,integer,smallint);
+
+CREATE OR REPLACE FUNCTION GetRecentFacilityControls(
   i_worldId smallint DEFAULT NULL,
   i_facilityId int DEFAULT NULL,
   i_rowLimit smallint DEFAULT 20
@@ -38,6 +40,19 @@ BEGIN
       FROM "FacilityControl" AS controls
         INNER JOIN CurrentMapRegions AS regions
           on controls."FacilityId" = regions."FacilityId"
+        -- This join to FacilityControlPlayers filters out FacilityControl events
+        -- that have no attributed players. This is intended to exclude uninteresting
+        -- control events, like those from a continent locking or unlocking.
+        INNER JOIN (SELECT players."FacilityId",
+                           players."Timestamp",
+                           players."WorldId"
+                       FROM "PlayerFacilityControl" players
+                       GROUP BY players."FacilityId",
+                               players."Timestamp",
+                               players."WorldId" ) AS playerControls
+          ON controls."FacilityId" = playerControls."FacilityId"
+             AND controls."Timestamp" = playerControls."Timestamp"
+             AND controls."WorldId" = playerControls."WorldId"
       WHERE (i_worldId IS NULL
             OR i_worldId = controls."WorldId")
         AND (i_facilityId IS NULL
