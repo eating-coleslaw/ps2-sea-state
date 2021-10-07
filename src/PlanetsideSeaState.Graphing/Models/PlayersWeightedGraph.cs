@@ -363,6 +363,5 @@ namespace PlanetsideSeaState.Graphing.Models
 
             return node.NeighborsSnapshot;
         }
-
     }
 }

@@ -1,4 +1,5 @@
-﻿using PlanetsideSeaState.App.Models;
+﻿using Microsoft.Extensions.Logging;
+using PlanetsideSeaState.App.Models;
 using PlanetsideSeaState.Data.Models.QueryResults;
 using PlanetsideSeaState.Data.Repositories;
 using PlanetsideSeaState.Graphing.Models;
@@ -18,12 +19,15 @@ namespace PlanetsideSeaState.App.Services.Graphing
     public class FacilityControlPopulationService : IFacilityControlPopulationService
     {
         private readonly IEventRepository _eventRepository;
+        private readonly ILogger<FacilityControlPopulationService> _logger;
 
-        private PlayersWeightedGraph Graph { get; set; } = new();
+        private PlayersWeightedGraph Graph { get; set; } //= new();
 
         // This is intended to act as a concurrent HashSet. The value type is byte because it's a small value type
-        private ConcurrentDictionary<PlayerNode, byte> VisitedPlayers { get; set; } = new();
-        private ConcurrentDictionary<PlayerNode, byte> AttributedPlayerNodes { get; set; } = new();
+        private ConcurrentDictionary<PlayerNode, int> VisitedPlayers { get; set; } //= new();
+        private ConcurrentDictionary<PlayerNode, int> VisitedPlayersMinDistances { get; set; }
+        //private ConcurrentDictionary<PlayerNode, byte> AttributedPlayerNodes { get; set; } //= new();
+        private List<PlayerNode> AttributedPlayerNodes { get; set; } //= new();
 
         private readonly int MaxSearchDepth = 10;
         private readonly TimeSpan MaxEventTimeSpan = TimeSpan.FromMinutes(1);
@@ -39,9 +43,15 @@ namespace PlanetsideSeaState.App.Services.Graphing
         private int Nso_Tr { get; set; }
         private int Nso_Unknown { get; set; }
 
-        public FacilityControlPopulationService(IEventRepository eventRepository)
+        public FacilityControlPopulationService(IEventRepository eventRepository, ILogger<FacilityControlPopulationService> logger)
         {
             _eventRepository = eventRepository;
+            _logger = logger;
+
+            Graph = new();
+            VisitedPlayers = new();
+            VisitedPlayersMinDistances = new();
+            AttributedPlayerNodes = new();
         }
 
         public async Task<FacilityControlPopulations> GetFacilityControlPopulationsAsync(Guid facilityControlId)
@@ -61,8 +71,7 @@ namespace PlanetsideSeaState.App.Services.Graphing
             var populations = new FacilityControlPopulations(facilityControl);
 
             // If there are no attributed players, then all population counts will be zero
-            var attributedPlayers = facilityControl.PlayerControls;
-            if (attributedPlayers.Count == 0)
+            if (facilityControl.PlayerControls.Count == 0)
             {
                 stopWatch.Stop();
                 populations.ElapsedMilliseconds = stopWatch.ElapsedMilliseconds;
@@ -70,8 +79,11 @@ namespace PlanetsideSeaState.App.Services.Graphing
                 return populations;
             }
 
+            var attributedPlayers = facilityControl.PlayerControls.OrderBy(e => e.Timestamp).ToArray();
+
             var endTime = facilityControl.Timestamp;
-            var startTime = endTime - TimeSpan.FromMinutes(5);
+            //var startTime = endTime - TimeSpan.FromMinutes(5);
+            var startTime = endTime - TimeSpan.FromMinutes(3);
             var worldId = facilityControl.WorldId;
             var zoneId = facilityControl.ZoneId;
 
@@ -139,14 +151,12 @@ namespace PlanetsideSeaState.App.Services.Graphing
 
                 playerNode.TeamId = facilityControl.NewFactionId;
 
-                //VisitedPlayers.TryAdd(playerNode, 0);
-                AttributedPlayerNodes.TryAdd(playerNode, 0);
+                AttributedPlayerNodes.Add(playerNode);
             }
 
             // 5. search through the Graph to get the population counts
-            foreach (var entry in AttributedPlayerNodes)
+            foreach (var playerNode in AttributedPlayerNodes)
             {
-                var playerNode = entry.Key;
                 var localVisitedPlayers = new ConcurrentDictionary<PlayerNode, byte>();
 
                 SearchGraph(playerNode, 0, facilityControl.Timestamp, localVisitedPlayers);
@@ -163,16 +173,6 @@ namespace PlanetsideSeaState.App.Services.Graphing
             populations.NsoFactionPlayers["NC"] = Nso_Nc;
             populations.NsoFactionPlayers["TR"] = Nso_Tr;
             populations.NsoFactionPlayers["Unknown"] = Nso_Unknown;
-            
-            //populations.Vs = Vs;
-            //populations.Nc = Nc;
-            //populations.Tr = Tr;
-            //populations.Uknown = Unknown;
-            //populations.Nso = Nso;
-            //populations.Nso_Vs = Nso_Vs;
-            //populations.Nso_Nc = Nso_Nc;
-            //populations.Nso_Tr = Nso_Tr;
-            //populations.Nso_Unknown = Nso_Unknown;
 
             populations.SearchBasePlayerEventTypes = new();
 
@@ -187,6 +187,13 @@ namespace PlanetsideSeaState.App.Services.Graphing
             stopWatch.Stop();
             populations.ElapsedMilliseconds = stopWatch.ElapsedMilliseconds;
 
+            Console.WriteLine($"____Visited {VisitedPlayers.Count}____");
+            Console.WriteLine($"ID \t\t\t Visited   Dist. Faction   Is Attr.");
+            foreach (var entry in VisitedPlayers.Keys.OrderBy(e => e.TeamId).ThenBy(e => e.LastSeen).ThenBy(e => e.Id))
+            {
+                Console.WriteLine($"{entry.Id}: \t {VisitedPlayers[entry]} \t   {VisitedPlayersMinDistances[entry]} \t [{Faction.GetAbbreviation(entry.TeamId)}] \t   {(AttributedPlayerNodes.Contains(entry) ? "(attr)" : string.Empty)}");
+            }
+
             return populations;
         }
 
@@ -197,8 +204,10 @@ namespace PlanetsideSeaState.App.Services.Graphing
                 return;
             }
 
-            if (VisitedPlayers.TryAdd(parent, 0))
+            if (VisitedPlayers.TryAdd(parent, 1))
             {
+                VisitedPlayersMinDistances.TryAdd(parent, depth);
+
                 Total++;
 
                 switch (parent.TeamId)
@@ -239,19 +248,21 @@ namespace PlanetsideSeaState.App.Services.Graphing
                         }
                         break;
                 }
-
-                //if (parent.FactionId == Faction.NSO)
-                //{
-                //    Nso++;
-                //}
             }
+            else
+            {
+                VisitedPlayers[parent] += 1;
+                VisitedPlayersMinDistances[parent] = Math.Min(depth, VisitedPlayersMinDistances[parent]);
+            }
+
 
             if (depth >= MaxSearchDepth)
             {
                 return;
             }
 
-            var connections = parent.ConnectionsSnapshot;
+            var connections = parent.Connections;
+                
             foreach (var connection in connections)
             {
                 var timeDiff = baseTimestamp - connection.LastUpdate;
@@ -264,7 +275,7 @@ namespace PlanetsideSeaState.App.Services.Graphing
 
                 // Skip continuing search from attributed players' nodes as they will already be
                 // the starting point for their own graph search.
-                if (AttributedPlayerNodes.ContainsKey(childNode))
+                if (AttributedPlayerNodes.Contains(childNode))
                 {
                     continue;
                 }

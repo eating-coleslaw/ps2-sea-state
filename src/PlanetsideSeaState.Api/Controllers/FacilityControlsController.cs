@@ -66,6 +66,7 @@ namespace PlanetsideSeaState.Api.Controllers
             return await _eventRepository.GetPlayerConnectionEventsAsync(startTime, endTime, worldId, zoneId);
         }
 
+        // GET api/<FacilityControlController>/population/c9c71fcc-435b-46b0-b840-10b196915a17
         [HttpGet("population/{id}")]
         public async Task<FacilityControlPopulations> GetFacilityControlPopulation(Guid id)
         {

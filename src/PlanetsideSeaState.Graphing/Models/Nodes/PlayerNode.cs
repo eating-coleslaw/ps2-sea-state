@@ -23,8 +23,10 @@ namespace PlanetsideSeaState.Graphing.Models.Nodes
         private ConcurrentDictionary<PlayerNode, PlayerEdge> NeighboringRelations { get; set; } = new();
 
         // TODO: don't make these publicly accessible / remove them
-        public ICollection<PlayerNode> Neighbors => NeighboringRelations.Keys;
-        public ICollection<PlayerEdge> Connections => NeighboringRelations.Values;
+        public IReadOnlyCollection<PlayerNode> Neighbors => NeighboringRelations.Keys.OrderBy(e => e.LastSeen).ThenBy(e => e.Id).ToArray();
+        public IReadOnlyCollection<PlayerEdge> Connections => NeighboringRelations.Values.OrderBy(e => e.LastUpdate).ThenBy(e => e.Child.Id).ToArray();
+
+        public IReadOnlyDictionary<PlayerNode, PlayerEdge> ReadonlyOnlyNeighboringRelations => NeighboringRelations;
 
         public HashSet<PlayerNode> NeighborsSnapshot { get => NeighboringRelations.Keys.ToHashSet(); }
         public HashSet<PlayerEdge> ConnectionsSnapshot { get => NeighboringRelations.Values.ToHashSet(); }

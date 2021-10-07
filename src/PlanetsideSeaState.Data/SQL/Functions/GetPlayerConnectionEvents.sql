@@ -26,8 +26,8 @@ BEGIN
 
   RETURN QUERY
     
-    SELECT death."AttackerCharacterId",
-           death."VictimCharacterId",
+    SELECT death."AttackerCharacterId"  AS Acting_Character_Id,
+           death."VictimCharacterId" AS Recipient_Character_Id,
            death."Timestamp",
            death_type AS "EventType",
            death."AttackerFactionId",
@@ -40,11 +40,12 @@ BEGIN
         AND (i_worldId IS NULL OR death."WorldId" = i_worldId)
         AND (i_zoneId IS NULL OR death."ZoneId" = i_zoneId)
         AND death."AttackerFactionId" IS NOT NULL
+        AND death."VictimFactionId" IS NOT NULL
 
     UNION
 
-    SELECT exp_gains."CharacterId",
-           exp_gains."OtherId",
+    SELECT exp_gains."CharacterId"  AS Acting_Character_Id,
+           exp_gains."OtherId" AS Recipient_Character_Id,
            exp_gains."Timestamp",
            exp_gain_type AS "EventType",
            charA."FactionId",
@@ -63,8 +64,8 @@ BEGIN
     
     UNION
 
-    SELECT destructions."AttackerCharacterId",
-           destructions."VictimCharacterId",
+    SELECT destructions."AttackerCharacterId" AS Acting_Character_Id,
+           destructions."VictimCharacterId" AS Recipient_Character_Id,
            destructions."Timestamp",
            vehicle_destroy_type AS "EventType",
            charA."FactionId",
@@ -82,7 +83,7 @@ BEGIN
         AND (i_worldId IS NULL OR destructions."WorldId" = i_worldId)
         AND (i_zoneId IS NULL OR destructions."ZoneId" = i_zoneId)
     
-      ORDER BY "Timestamp" ASC;
+      ORDER BY "Timestamp" ASC, Acting_Character_Id DESC, Recipient_Character_Id DESC;
 
 END;
 $BODY$
