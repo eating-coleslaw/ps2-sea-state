@@ -26,22 +26,17 @@ namespace PlanetsideSeaState.App.Services.Graphing
         // This is intended to act as a concurrent HashSet. The value type is byte because it's a small value type
         private ConcurrentDictionary<PlayerNode, int> VisitedPlayers { get; set; } //= new();
         private ConcurrentDictionary<PlayerNode, int> VisitedPlayersMinDistances { get; set; }
+        private ConcurrentDictionary<PlayerNode, int> VisitedPlayersMinDistancesToAttributedFaction { get; set; }
+        private ConcurrentDictionary<PlayerNode, int> VisitedPlayersDepthSums { get; set; }
         //private ConcurrentDictionary<PlayerNode, byte> AttributedPlayerNodes { get; set; } //= new();
         private List<PlayerNode> AttributedPlayerNodes { get; set; } //= new();
 
         private readonly int MaxSearchDepth = 10;
         private readonly TimeSpan MaxEventTimeSpan = TimeSpan.FromMinutes(1);
 
-        private int Total { get; set; }
-        private int Vs { get; set; }
-        private int Nc { get; set; }
-        private int Tr { get; set; }
-        private int Unknown { get; set; }
-        private int Nso { get; set; }
-        private int Nso_Vs { get; set; }
-        private int Nso_Nc { get; set; }
-        private int Nso_Tr { get; set; }
-        private int Nso_Unknown { get; set; }
+        private FactionTeamCounts TeamPlayers { get; set; }
+        private FactionTeamCounts NsoTeamPlayers { get; set; }
+        private short AttributedFaction { get; set; } = Faction.Unknown;
 
         public FacilityControlPopulationService(IEventRepository eventRepository, ILogger<FacilityControlPopulationService> logger)
         {
@@ -51,7 +46,12 @@ namespace PlanetsideSeaState.App.Services.Graphing
             Graph = new();
             VisitedPlayers = new();
             VisitedPlayersMinDistances = new();
+            VisitedPlayersMinDistancesToAttributedFaction = new();
+            VisitedPlayersDepthSums = new();
+
             AttributedPlayerNodes = new();
+            TeamPlayers = new();
+            NsoTeamPlayers = new();
         }
 
         public async Task<FacilityControlPopulations> GetFacilityControlPopulationsAsync(Guid facilityControlId)
@@ -67,6 +67,8 @@ namespace PlanetsideSeaState.App.Services.Graphing
             {
                 return null;
             }
+
+            AttributedFaction = facilityControl.NewFactionId;
 
             var populations = new FacilityControlPopulations(facilityControl);
 
@@ -159,20 +161,11 @@ namespace PlanetsideSeaState.App.Services.Graphing
             {
                 var localVisitedPlayers = new ConcurrentDictionary<PlayerNode, byte>();
 
-                SearchGraph(playerNode, 0, facilityControl.Timestamp, localVisitedPlayers);
+                SearchGraph(playerNode, 0, facilityControl.Timestamp, localVisitedPlayers, 0);
             }
 
-            populations.TotalPlayers = Total;
-            populations.FactionPlayers["VS"] = Vs;
-            populations.FactionPlayers["NC"] = Nc;
-            populations.FactionPlayers["TR"] = Tr;
-            populations.FactionPlayers["Unknown"] = Unknown;
-
-            populations.NsoPlayers = Nso;
-            populations.NsoFactionPlayers["VS"] = Nso_Vs;
-            populations.NsoFactionPlayers["NC"] = Nso_Nc;
-            populations.NsoFactionPlayers["TR"] = Nso_Tr;
-            populations.NsoFactionPlayers["Unknown"] = Nso_Unknown;
+            populations.TeamPlayers = TeamPlayers;
+            populations.NsoTeamPlayers = NsoTeamPlayers;
 
             populations.SearchBasePlayerEventTypes = new();
 
@@ -188,71 +181,81 @@ namespace PlanetsideSeaState.App.Services.Graphing
             populations.ElapsedMilliseconds = stopWatch.ElapsedMilliseconds;
 
             Console.WriteLine($"____Visited {VisitedPlayers.Count}____");
-            Console.WriteLine($"ID \t\t\t Visited   Dist. Faction   Is Attr.");
+            Console.WriteLine($"ID \t\t\t\t Visited   Dist.   DS   AD   Faction   Is Attr.");
             foreach (var entry in VisitedPlayers.Keys.OrderBy(e => e.TeamId).ThenBy(e => e.LastSeen).ThenBy(e => e.Id))
             {
-                Console.WriteLine($"{entry.Id}: \t {VisitedPlayers[entry]} \t   {VisitedPlayersMinDistances[entry]} \t [{Faction.GetAbbreviation(entry.TeamId)}] \t   {(AttributedPlayerNodes.Contains(entry) ? "(attr)" : string.Empty)}");
+                var id = entry.Id;
+                var visited = VisitedPlayers[entry];
+                var minDistance = VisitedPlayersMinDistances[entry];
+                var minDistanceToAttrFaction = VisitedPlayersMinDistancesToAttributedFaction[entry];
+                var depthSum = VisitedPlayersDepthSums[entry];
+
+                var isAttributed = AttributedPlayerNodes.Contains(entry);
+                var faction = Faction.GetAbbreviation(entry.TeamId);
+
+
+                Console.WriteLine($"{id} \t {visited} \t   {minDistance} \t {minDistanceToAttrFaction} \t {depthSum} \t {faction} \t   {(isAttributed ? "(attr)" : string.Empty)}");
             }
 
             return populations;
         }
 
-        private void SearchGraph(PlayerNode parent, int depth, DateTime baseTimestamp, ConcurrentDictionary<PlayerNode, byte> localVisitedPlayers)
+        private void SearchGraph(PlayerNode node, int depth, DateTime baseTimestamp, ConcurrentDictionary<PlayerNode, byte> localVisitedPlayers, int attrFactionDist)
         {
-            if (!localVisitedPlayers.TryAdd(parent, 0))
+            if (!localVisitedPlayers.TryAdd(node, 0))
             {
                 return;
             }
 
-            if (VisitedPlayers.TryAdd(parent, 1))
+            attrFactionDist = node.FactionId == AttributedFaction ? 0 : attrFactionDist;
+
+            if (VisitedPlayers.TryAdd(node, 1))
             {
-                VisitedPlayersMinDistances.TryAdd(parent, depth);
+                VisitedPlayersMinDistances.TryAdd(node, depth);
+                VisitedPlayersMinDistancesToAttributedFaction.TryAdd(node, attrFactionDist);
+                VisitedPlayersDepthSums.TryAdd(node, depth);
 
-                Total++;
-
-                switch (parent.TeamId)
+                switch (node.TeamId)
                 {
                     case Faction.VS:
-                        Vs++;
-                        if (parent.FactionId == Faction.NSO)
+                        TeamPlayers.AddVs(1);
+                        if (node.FactionId == Faction.NSO)
                         {
-                            Nso_Vs++;
-                            Nso++;
+                            NsoTeamPlayers.AddVs(1);
                         }
                         break;
 
                     case Faction.NC:
-                        Nc++;
-                        if (parent.FactionId == Faction.NSO)
+                        TeamPlayers.AddNc(1);
+                        if (node.FactionId == Faction.NSO)
                         {
-                            Nso_Nc++;
-                            Nso++;
+                            NsoTeamPlayers.AddNc(1);
                         }
                         break;
 
                     case Faction.TR:
-                        Tr++;
-                        if (parent.FactionId == Faction.NSO)
+                        TeamPlayers.AddTr(1);
+                        if (node.FactionId == Faction.NSO)
                         {
-                            Nso_Tr++;
-                            Nso++;
+                            NsoTeamPlayers.AddTr(1);
                         }
                         break;
 
                     default:
-                        Unknown++;
-                        if (parent.FactionId == Faction.NSO)
+                        TeamPlayers.AddUnknown(1);
+                        if (node.FactionId == Faction.NSO)
                         {
-                            Nso_Unknown++;
-                            Nso++;
+                            NsoTeamPlayers.AddUnknown(1);
                         }
                         break;
                 }
             }
             else
             {
-                VisitedPlayers[parent] += 1;
-                VisitedPlayersMinDistances[parent] = Math.Min(depth, VisitedPlayersMinDistances[parent]);
+                VisitedPlayers[node] += 1;
+                VisitedPlayersMinDistances[node] = Math.Min(depth, VisitedPlayersMinDistances[node]);
+                VisitedPlayersMinDistancesToAttributedFaction[node] = Math.Min(attrFactionDist, VisitedPlayersMinDistancesToAttributedFaction[node]);
+                VisitedPlayersDepthSums[node] += depth;
             }
 
 
@@ -261,8 +264,10 @@ namespace PlanetsideSeaState.App.Services.Graphing
                 return;
             }
 
-            var connections = parent.Connections;
-                
+            var connections = node.Connections;
+
+            //attrFactionDist = node.FactionId == AttributedFaction ? 0 : (attrFactionDist + 1);
+
             foreach (var connection in connections)
             {
                 var timeDiff = baseTimestamp - connection.LastUpdate;
@@ -273,14 +278,17 @@ namespace PlanetsideSeaState.App.Services.Graphing
 
                 var childNode = connection.Child;
 
+                // Don't skip attributed players because we still want to get distances and visited counts for them
+                
                 // Skip continuing search from attributed players' nodes as they will already be
                 // the starting point for their own graph search.
-                if (AttributedPlayerNodes.Contains(childNode))
-                {
-                    continue;
-                }
+                //if (AttributedPlayerNodes.Contains(childNode))
+                //{
+                //    continue;
+                //}
 
-                SearchGraph(childNode, depth + 1, baseTimestamp, localVisitedPlayers);
+
+                SearchGraph(childNode, depth + 1, baseTimestamp, localVisitedPlayers, attrFactionDist + 1);
             }
         }
 

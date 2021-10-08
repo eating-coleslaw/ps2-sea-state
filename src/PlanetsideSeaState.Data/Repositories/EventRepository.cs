@@ -17,12 +17,14 @@ namespace PlanetsideSeaState.Data.Repositories
         private readonly ILogger<EventRepository> _logger;
         private readonly IDataReader<FacilityControlInfo> _controlDataReader;
         private readonly IDataReader<PlayerConnectionEvent> _playerConnectionDataReader;
+        private readonly IDataReader<PlayerFacilityControlProximity> _playerControlProximityDataReader;
 
         public EventRepository(
             IDbContextHelper dbContextHelper,
             IDbHelper dbHelper,
             IDataReader<FacilityControlInfo> controlDataReader,
             IDataReader<PlayerConnectionEvent> playerConnectionDataReader,
+            IDataReader<PlayerFacilityControlProximity> playerControlProximityDataReader,
             ILogger<EventRepository> logger
         )
         {
@@ -30,6 +32,7 @@ namespace PlanetsideSeaState.Data.Repositories
             _dbHelper = dbHelper;
             _logger = logger;
             _controlDataReader = controlDataReader ?? throw new ArgumentNullException(nameof(controlDataReader));
+            _playerControlProximityDataReader = playerControlProximityDataReader ?? throw new ArgumentNullException(nameof(playerControlProximityDataReader));
             _playerConnectionDataReader = playerConnectionDataReader ?? throw new ArgumentNullException(nameof(playerConnectionDataReader));
         }
 
@@ -308,6 +311,23 @@ namespace PlanetsideSeaState.Data.Repositories
             cmd.AddParameter("zoneId", zoneId);
 
             IEnumerable<PlayerConnectionEvent> events = await _playerConnectionDataReader.ReadList(cmd);
+            await connection.CloseAsync();
+
+            return events;
+        }
+
+        public async Task<IEnumerable<PlayerFacilityControlProximity>> GetClosestPlayerFacilityControlsAsync(DateTime start, DateTime end, short worldId, uint zoneId)
+        {
+            using NpgsqlConnection connection = _dbHelper.CreateConnection();
+
+            using NpgsqlCommand cmd = await _dbHelper.CreateTextCommand(connection, @"SELECT * FROM GetClosestPlayerFacilityControls(@start, @end, @worldId, @zoneId);");
+
+            cmd.AddParameter("start", start);
+            cmd.AddParameter("end", end);
+            cmd.AddParameter("worldId", worldId);
+            cmd.AddParameter("zoneId", zoneId);
+
+            IEnumerable<PlayerFacilityControlProximity> events = await _playerControlProximityDataReader.ReadList(cmd);
             await connection.CloseAsync();
 
             return events;

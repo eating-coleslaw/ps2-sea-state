@@ -49,6 +49,7 @@ namespace PlanetsideSeaState.Data
 
             services.AddSingleton<IDataReader<FacilityControlInfo>, FacilityControlInfoReader>();
             services.AddSingleton<IDataReader<PlayerConnectionEvent>, PlayerConnectionEventReader>();
+            services.AddSingleton<IDataReader<PlayerFacilityControlProximity>, PlayerFacilityControlProximityReader>();
 
             return services;
         }

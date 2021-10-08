@@ -23,6 +23,9 @@ namespace PlanetsideSeaState.App.Models
 
         public int? AttributedPlayers { get; set; }
 
+        public FactionTeamCounts TeamPlayers {get; set; }
+        public FactionTeamCounts NsoTeamPlayers { get; set; }
+
         public int TotalPlayers { get; set; }
         public Dictionary<string, int> FactionPlayers { get; set; } = new()
         {

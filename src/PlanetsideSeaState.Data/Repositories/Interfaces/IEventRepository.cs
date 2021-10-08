@@ -11,6 +11,7 @@ namespace PlanetsideSeaState.Data.Repositories
     public interface IEventRepository
     {
         Task AddAsync<T>(T entity) where T : class;
+        Task<IEnumerable<PlayerFacilityControlProximity>> GetClosestPlayerFacilityControlsAsync(DateTime start, DateTime end, short worldId, uint zoneId);
         Task<IEnumerable<Death>> GetDeathsForWorldInTimeRange(short worldId, DateTime start, DateTime end);
         Task<IEnumerable<DeathWithExperience>> GetDeathWithExperienceForWorldInTimeRange(short worldId, DateTime start, DateTime end);
         Task<FacilityControl> GetFacilityControl(int facilityId, DateTime timestamp, short worldId);
