@@ -12,7 +12,7 @@ namespace PlanetsideSeaState.Data.Migrations
             var basePath = AppDomain.CurrentDomain.RelativeSearchPath ?? AppDomain.CurrentDomain.BaseDirectory;
 
             // GetClosestPlayerFacilityControls View
-            var mapRegionsViewSqlFile = "SQL/Views/GetClosestPlayerFacilityControls.sql";
+            var mapRegionsViewSqlFile = "SQL/Functions/GetClosestPlayerFacilityControls.sql";
             var mapRegionsViewFilePath = Path.Combine(basePath, mapRegionsViewSqlFile);
             migrationBuilder.Sql(File.ReadAllText(mapRegionsViewFilePath));
         }
