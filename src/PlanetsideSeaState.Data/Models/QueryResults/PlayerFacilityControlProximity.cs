@@ -11,5 +11,7 @@ namespace PlanetsideSeaState.Data.Models.QueryResults
         public short NewFactionId { get; set; }
         public uint ZoneId { get; set; }
         public TimeSpan TimeDiff { get; set; }
+
+        public double TimeDiffSeconds => TimeDiff.TotalSeconds;
     }
 }

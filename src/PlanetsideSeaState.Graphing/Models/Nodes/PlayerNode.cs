@@ -1,4 +1,5 @@
 ﻿using PlanetsideSeaState.Data.Models.Census;
+using PlanetsideSeaState.Data.Models.QueryResults;
 using PlanetsideSeaState.Graphing.Models.Events;
 using System;
 using System.Collections.Concurrent;
@@ -19,6 +20,8 @@ namespace PlanetsideSeaState.Graphing.Models.Nodes
 
         public uint ZoneId { get; set; }
         public DateTime LastSeen { get; private set; }
+
+        public PlayerFacilityControlProximity ClosestFacilityControl { get; set; }
 
         private ConcurrentDictionary<PlayerNode, PlayerEdge> NeighboringRelations { get; set; } = new();
 

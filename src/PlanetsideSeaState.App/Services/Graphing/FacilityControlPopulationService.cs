@@ -30,6 +30,8 @@ namespace PlanetsideSeaState.App.Services.Graphing
         private ConcurrentDictionary<PlayerNode, int> VisitedPlayersDepthSums { get; set; }
         //private ConcurrentDictionary<PlayerNode, byte> AttributedPlayerNodes { get; set; } //= new();
         private List<PlayerNode> AttributedPlayerNodes { get; set; } //= new();
+        
+        private ConcurrentDictionary<Guid, int> ClosesControlPlayerCounts { get; set; }
 
         private readonly int MaxSearchDepth = 10;
         private readonly TimeSpan MaxEventTimeSpan = TimeSpan.FromMinutes(1);
@@ -50,6 +52,9 @@ namespace PlanetsideSeaState.App.Services.Graphing
             VisitedPlayersDepthSums = new();
 
             AttributedPlayerNodes = new();
+
+            ClosesControlPlayerCounts = new();
+
             TeamPlayers = new();
             NsoTeamPlayers = new();
         }
@@ -140,7 +145,7 @@ namespace PlanetsideSeaState.App.Services.Graphing
                 Graph.AddOrUpdateRelation(actingNode, recipientNode, ev);
             }
 
-            // 4.5 get all PlayerNodes for attributed players
+            // 4.1 get all PlayerNodes for attributed players
             foreach (var player in attributedPlayers)
             {
                 var playerNode = Graph.GetPlayerNode(player.CharacterId);
@@ -154,6 +159,32 @@ namespace PlanetsideSeaState.App.Services.Graphing
                 playerNode.TeamId = facilityControl.NewFactionId;
 
                 AttributedPlayerNodes.Add(playerNode);
+            }
+
+            // 4.2 get closest facility control for all players
+            var closestFacilityControls = await _eventRepository.GetClosestPlayerFacilityControlsAsync(startTime, endTime, worldId, zoneId);
+            foreach (var playerControl in closestFacilityControls)
+            {
+                var playerNode = Graph.GetPlayerNode(playerControl.CharacterId);
+
+                if (playerNode == null)
+                {
+                    continue;
+                }
+
+                if (playerNode.TeamId == null || playerNode.TeamId == Faction.Unknown)
+                {
+                    playerNode.TeamId = playerControl.NewFactionId;
+                }
+
+                playerNode.ClosestFacilityControl = playerControl;
+
+                ClosesControlPlayerCounts.AddOrUpdate(playerControl.FacilityControlId, 1, (key, oldValue) => oldValue + 1);
+            }
+
+            foreach (var closeControlCount in ClosesControlPlayerCounts)
+            {
+                Console.WriteLine($"{closeControlCount.Key}: {closeControlCount.Value}");
             }
 
             // 5. search through the Graph to get the population counts
@@ -181,7 +212,7 @@ namespace PlanetsideSeaState.App.Services.Graphing
             populations.ElapsedMilliseconds = stopWatch.ElapsedMilliseconds;
 
             Console.WriteLine($"____Visited {VisitedPlayers.Count}____");
-            Console.WriteLine($"ID \t\t\t\t Visited   Dist.   DS   AD   Faction   Is Attr.");
+            Console.WriteLine($"ID \t\t\t\t Visited   Dist.   DS   AD   Diff   Faction   Is Attr.");
             foreach (var entry in VisitedPlayers.Keys.OrderBy(e => e.TeamId).ThenBy(e => e.LastSeen).ThenBy(e => e.Id))
             {
                 var id = entry.Id;
@@ -189,12 +220,13 @@ namespace PlanetsideSeaState.App.Services.Graphing
                 var minDistance = VisitedPlayersMinDistances[entry];
                 var minDistanceToAttrFaction = VisitedPlayersMinDistancesToAttributedFaction[entry];
                 var depthSum = VisitedPlayersDepthSums[entry];
+                var diffSeconds = entry.ClosestFacilityControl?.TimeDiffSeconds.ToString() ?? "null";
 
                 var isAttributed = AttributedPlayerNodes.Contains(entry);
                 var faction = Faction.GetAbbreviation(entry.TeamId);
 
 
-                Console.WriteLine($"{id} \t {visited} \t   {minDistance} \t {minDistanceToAttrFaction} \t {depthSum} \t {faction} \t   {(isAttributed ? "(attr)" : string.Empty)}");
+                Console.WriteLine($"{id} \t {visited} \t   {minDistance} \t {minDistanceToAttrFaction} \t {depthSum} \t {diffSeconds} \t {faction} \t   {(isAttributed ? "(attr)" : string.Empty)}");
             }
 
             return populations;
