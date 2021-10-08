@@ -1,3 +1,10 @@
+DROP FUNCTION IF EXISTS GetClosestPlayerFacilityControls(
+  timestamp without time zone,
+  timestamp without time zone,
+  smallint,
+  bigint
+);
+
 CREATE OR REPLACE FUNCTION GetClosestPlayerFacilityControls(
   i_timestamp_start timestamp without time zone,
   i_timestamp_end timestamp without time zone,
@@ -9,6 +16,7 @@ CREATE OR REPLACE FUNCTION GetClosestPlayerFacilityControls(
     Facility_Id int,
     "Timestamp" timestamp without time zone,
     Facility_Control_Id uuid,
+    New_Faction_Id smallint,
     Zone_Id bigint,
     Time_Diff interval
   )
@@ -46,6 +54,13 @@ BEGIN
                 WHEN p_controls_before.time_diff > p_controls_after.time_diff
                   THEN p_controls_after."FacilityControlId"
             ELSE p_controls_before."FacilityControlId" END AS facility_control_id,
+          MAX(CASE WHEN p_controls_before.time_diff IS NULL
+                     THEN p_controls_after."NewFactionId"
+                   WHEN p_controls_after.time_diff IS NULL
+                     THEN p_controls_before."NewFactionId"
+                   WHEN p_controls_before.time_diff > p_controls_after.time_diff
+                     THEN p_controls_after."NewFactionId"
+                   ELSE p_controls_before."NewFactionId" END) AS new_faction_id,
           MAX(CASE WHEN p_controls_before.time_diff IS NULL
                       THEN p_controls_after."ZoneId"
                     WHEN p_controls_after.time_diff IS NULL
@@ -125,6 +140,7 @@ BEGIN
                                 p_controls_a."Timestamp",
                                 p_controls_a."CharacterId",
                                 p_controls_a."FacilityControlId",
+                                controls."NewFactionId",
                                 p_controls_a."ZoneId",
                                 (i_timestamp_end - p_controls_a."Timestamp") AS time_diff
                           FROM "PlayerFacilityControl" AS p_controls_a
@@ -136,12 +152,17 @@ BEGIN
                                           GROUP BY p_controls."FacilityId", p_controls."CharacterId" ) AS max_time
                               ON p_controls_a."CharacterId" = max_time."CharacterId"
                                   AND p_controls_a."FacilityId" = max_time."FacilityId"
-                                  AND p_controls_a."Timestamp" = max_time."Timestamp") AS p_controls_before
+                                  AND p_controls_a."Timestamp" = max_time."Timestamp"
+                            INNER JOIN "FacilityControl" controls
+                              ON p_controls_a."FacilityId" = controls."FacilityId"
+                                 AND p_controls_a."Timestamp" = controls."Timestamp"
+                                 AND p_controls_a."WorldId" = controls."WorldId") AS p_controls_before
           ON event_chars.character_id = p_controls_before."CharacterId"
         LEFT OUTER JOIN (SELECT p_controls_a."FacilityId",
                                 p_controls_a."Timestamp",
                                 p_controls_a."CharacterId",
                                 p_controls_a."FacilityControlId",
+                                controls."NewFactionId",
                                 p_controls_a."ZoneId",
                                 (p_controls_a."Timestamp" - i_timestamp_end) AS time_diff
                           FROM "PlayerFacilityControl" AS p_controls_a
@@ -153,7 +174,11 @@ BEGIN
                                           GROUP BY p_controls."FacilityId", p_controls."CharacterId" ) AS min_time
                               ON p_controls_a."CharacterId" = min_time."CharacterId"
                                   AND p_controls_a."FacilityId" = min_time."FacilityId"
-                                  AND p_controls_a."Timestamp" = min_time."Timestamp") AS p_controls_after
+                                  AND p_controls_a."Timestamp" = min_time."Timestamp"
+                            INNER JOIN "FacilityControl" controls
+                              ON p_controls_a."FacilityId" = controls."FacilityId"
+                                 AND p_controls_a."Timestamp" = controls."Timestamp"
+                                 AND p_controls_a."WorldId" = controls."WorldId") AS p_controls_after
           ON event_chars.character_id = p_controls_after."CharacterId"
       WHERE p_controls_after."FacilityId" IS NOT NULL
         OR p_controls_before."FacilityId" IS NOT NULL

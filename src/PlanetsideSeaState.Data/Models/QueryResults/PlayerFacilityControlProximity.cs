@@ -8,6 +8,7 @@ namespace PlanetsideSeaState.Data.Models.QueryResults
         public int FacilityId { get; set; }
         public DateTime Timestamp { get; set; }
         public Guid FacilityControlId { get; set; }
+        public short NewFactionId { get; set; }
         public uint ZoneId { get; set; }
         public TimeSpan TimeDiff { get; set; }
     }

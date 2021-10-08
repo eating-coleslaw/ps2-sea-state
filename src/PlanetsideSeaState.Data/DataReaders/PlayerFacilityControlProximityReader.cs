@@ -15,8 +15,9 @@ namespace PlanetsideSeaState.Data.DataReaders
             control.FacilityId = reader.GetInt32("recipient_character_id");
             control.Timestamp = reader.GetDateTime("timestamp");
             control.FacilityControlId = reader.GetGuid("facility_control_id");
+            control.NewFactionId = reader.GetInt16("new_faction_id");
             control.ZoneId = reader.GetUInt32("zone_id");
-            control.TimeDiff = reader.GetTimeSpan(6);
+            control.TimeDiff = reader.GetTimeSpan(7);
 
             return control;
         }
