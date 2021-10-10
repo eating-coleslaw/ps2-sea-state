@@ -18,6 +18,7 @@ namespace PlanetsideSeaState.Data.DataReaders
             control.NewFactionId = reader.GetInt16("new_faction_id");
             control.ZoneId = reader.GetUInt32("zone_id");
             control.TimeDiff = reader.GetTimeSpan(6);
+            control.Direction = reader.GetInt16("direction");
 
             return control;
         }
