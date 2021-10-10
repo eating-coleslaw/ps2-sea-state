@@ -18,16 +18,21 @@ CREATE OR REPLACE FUNCTION GetClosestPlayerFacilityControls(
     Facility_Control_Id uuid,
     New_Faction_Id smallint,
     Zone_Id bigint,
-    Time_Diff interval
+    Time_Diff interval,
+    Direction smallint
   )
   LANGUAGE plpgsql
 AS
 $BODY$
 DECLARE
-  control_lookahead_interval interval := INTERVAL '1 minute';
+  control_lookbehind_interval interval := INTERVAL '2 minute';
+  control_lookbehind_start timestamp without time zone;
+  
+  control_lookahead_interval interval := INTERVAL '5 minute';
   control_lookahead_end timestamp without time zone;
 
 BEGIN
+  control_lookbehind_start := i_timestamp_start - control_lookbehind_interval;
   control_lookahead_end := i_timestamp_end + control_lookahead_interval;
 
   RETURN QUERY
@@ -74,7 +79,23 @@ BEGIN
                       THEN p_controls_before.time_diff
                     WHEN p_controls_before.time_diff > p_controls_after.time_diff
                       THEN p_controls_after.time_diff
-                ELSE p_controls_before.time_diff END) AS time_diff
+                ELSE p_controls_before.time_diff END) AS time_diff,
+          MAX(CASE WHEN p_controls_before.time_diff IS NULL
+                      THEN CASE WHEN p_controls_after.time_diff = '0'::interval
+                                  THEN 0::smallint
+                                ELSE 1::smallint END
+                    WHEN p_controls_after.time_diff IS NULL
+                      THEN CASE WHEN p_controls_before.time_diff = '0'::interval
+                                  THEN 0::smallint
+                                ELSE -1::smallint END
+                    WHEN p_controls_before.time_diff > p_controls_after.time_diff
+                      THEN CASE WHEN p_controls_after.time_diff = '0'::interval
+                                  THEN 0::smallint
+                                ELSE 1::smallint END
+                    ELSE CASE WHEN p_controls_before.time_diff = '0'::interval
+                            THEN 0::smallint
+                          ELSE -1::smallint END
+                    END) AS Direction
       FROM (SELECT DISTINCT death."AttackerCharacterId"  AS character_id
               FROM "Death" death
               WHERE death."AttackerCharacterId" <> '0'
@@ -148,7 +169,7 @@ BEGIN
                                                 MAX(p_controls."Timestamp") AS "Timestamp",
                                                 p_controls."CharacterId"
                                           FROM "PlayerFacilityControl" p_controls
-                                          WHERE p_controls."Timestamp" BETWEEN i_timestamp_start AND i_timestamp_end
+                                          WHERE p_controls."Timestamp" BETWEEN control_lookbehind_start AND i_timestamp_end
                                           GROUP BY p_controls."FacilityId", p_controls."CharacterId" ) AS max_time
                               ON p_controls_a."CharacterId" = max_time."CharacterId"
                                   AND p_controls_a."FacilityId" = max_time."FacilityId"
@@ -170,7 +191,7 @@ BEGIN
                                                 MIN(p_controls."Timestamp") AS "Timestamp",
                                                 p_controls."CharacterId"
                                           FROM "PlayerFacilityControl" p_controls
-                                          WHERE p_controls."Timestamp" BETWEEN i_timestamp_end AND '2021-10-06T16:49:47'
+                                          WHERE p_controls."Timestamp" BETWEEN i_timestamp_end AND control_lookahead_end
                                           GROUP BY p_controls."FacilityId", p_controls."CharacterId" ) AS min_time
                               ON p_controls_a."CharacterId" = min_time."CharacterId"
                                   AND p_controls_a."FacilityId" = min_time."FacilityId"
