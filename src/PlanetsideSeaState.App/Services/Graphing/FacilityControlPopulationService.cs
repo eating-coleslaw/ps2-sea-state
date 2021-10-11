@@ -27,6 +27,7 @@ namespace PlanetsideSeaState.App.Services.Graphing
         private ConcurrentDictionary<PlayerNode, int> VisitedPlayers { get; set; } //= new();
         private ConcurrentDictionary<PlayerNode, int> VisitedPlayersMinDistances { get; set; }
         private ConcurrentDictionary<PlayerNode, int> VisitedPlayersMinDistancesToAttributedFaction { get; set; }
+        private ConcurrentDictionary<PlayerNode, ConcurrentDictionary<int, int>> VisitedPlayerDepths { get; set; }
         private ConcurrentDictionary<PlayerNode, int> VisitedPlayersDepthSums { get; set; }
         //private ConcurrentDictionary<PlayerNode, byte> AttributedPlayerNodes { get; set; } //= new();
         private List<PlayerNode> AttributedPlayerNodes { get; set; } //= new();
@@ -49,6 +50,7 @@ namespace PlanetsideSeaState.App.Services.Graphing
             VisitedPlayers = new();
             VisitedPlayersMinDistances = new();
             VisitedPlayersMinDistancesToAttributedFaction = new();
+            VisitedPlayerDepths = new();
             VisitedPlayersDepthSums = new();
 
             AttributedPlayerNodes = new();
@@ -182,6 +184,7 @@ namespace PlanetsideSeaState.App.Services.Graphing
                 ClosesControlPlayerCounts.AddOrUpdate(playerControl.FacilityControlId, 1, (key, oldValue) => oldValue + 1);
             }
 
+            populations.CloseFacilityControlPlayerCounts = ClosesControlPlayerCounts;
             foreach (var closeControlCount in ClosesControlPlayerCounts)
             {
                 Console.WriteLine($"{closeControlCount.Key}: {closeControlCount.Value}");
@@ -216,15 +219,43 @@ namespace PlanetsideSeaState.App.Services.Graphing
             foreach (var entry in VisitedPlayers.Keys.OrderBy(e => e.TeamId).ThenBy(e => e.LastSeen).ThenBy(e => e.Id))
             {
                 var id = entry.Id;
-                var visited = VisitedPlayers[entry];
-                var minDistance = VisitedPlayersMinDistances[entry];
-                var minDistanceToAttrFaction = VisitedPlayersMinDistancesToAttributedFaction[entry];
-                var depthSum = VisitedPlayersDepthSums[entry];
+                VisitedPlayers.TryGetValue(entry, out int visited);
+                VisitedPlayersMinDistances.TryGetValue(entry, out int minDistance);
+                VisitedPlayersMinDistancesToAttributedFaction.TryGetValue(entry, out int minDistanceToAttrFaction);
+                VisitedPlayersDepthSums.TryGetValue(entry, out int depthSum);
                 var diffSeconds = entry.ClosestFacilityControl?.TimeDiffSeconds.ToString() ?? "null";
 
                 var isAttributed = AttributedPlayerNodes.Contains(entry);
                 var faction = Faction.GetAbbreviation(entry.TeamId);
 
+                VisitedPlayerDepths.TryGetValue(entry, out var visitedDepths);
+
+                var player = new FacilityControlPopulationPlayer()
+                {
+                    Id = entry.Id,
+                    FactionId = entry.FactionId,
+                    Name = entry.Name,
+                    TeamId = entry.TeamId,
+                    ZoneId = entry.ZoneId,
+                    LastSeen = entry.LastSeen,
+                    IsAttributed = AttributedPlayerNodes.Contains(entry),
+                    Visisted = visited,
+                    MinDistance = minDistance,
+                    MinDistanceToAtrributedFaction = minDistanceToAttrFaction,
+                    DepthsSum = depthSum,
+                    VisitedDepths = visitedDepths,
+                    ClosesFacilityControl = (entry.ClosestFacilityControl) == null ? null : new FacilityControlProximityInfo()
+                    {
+                        FacilityId = entry.ClosestFacilityControl.FacilityId,
+                        Timestamp = entry.ClosestFacilityControl.Timestamp,
+                        FacilityControlId = entry.ClosestFacilityControl.FacilityControlId,
+                        NewFactionId = entry.ClosestFacilityControl.NewFactionId,
+                        ZoneId = entry.ClosestFacilityControl.ZoneId,
+                        TimeDiffSeconds = entry.ClosestFacilityControl.TimeDiffSeconds
+                    }
+                };
+
+                populations.AddPlayerDetails(player);
 
                 Console.WriteLine($"{id} \t {visited} \t   {minDistance} \t {minDistanceToAttrFaction} \t {depthSum} \t {diffSeconds} \t {faction} \t   {(isAttributed ? "(attr)" : string.Empty)}");
             }
@@ -246,6 +277,11 @@ namespace PlanetsideSeaState.App.Services.Graphing
                 VisitedPlayersMinDistances.TryAdd(node, depth);
                 VisitedPlayersMinDistancesToAttributedFaction.TryAdd(node, attrFactionDist);
                 VisitedPlayersDepthSums.TryAdd(node, depth);
+
+                var depthDictionary = new ConcurrentDictionary<int, int>();
+                depthDictionary.TryAdd(depth, 1);
+                VisitedPlayerDepths.TryAdd(node, depthDictionary);
+
 
                 switch (node.TeamId)
                 {
@@ -284,10 +320,21 @@ namespace PlanetsideSeaState.App.Services.Graphing
             }
             else
             {
+                // TODO: [node] syntax isn't thread-safe
                 VisitedPlayers[node] += 1;
                 VisitedPlayersMinDistances[node] = Math.Min(depth, VisitedPlayersMinDistances[node]);
                 VisitedPlayersMinDistancesToAttributedFaction[node] = Math.Min(attrFactionDist, VisitedPlayersMinDistancesToAttributedFaction[node]);
                 VisitedPlayersDepthSums[node] += depth;
+
+                var depthDictionary = VisitedPlayerDepths[node];
+                if (depthDictionary.ContainsKey(depth))
+                {
+                    depthDictionary[depth] += 1;
+                }
+                else
+                {
+                    depthDictionary.TryAdd(depth, 1);
+                }
             }
 
 

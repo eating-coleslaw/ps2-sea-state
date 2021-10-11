@@ -10,9 +10,9 @@ namespace PlanetsideSeaState.Data.Models.QueryResults
         public Guid FacilityControlId { get; set; }
         public short NewFactionId { get; set; }
         public uint ZoneId { get; set; }
-        public TimeSpan TimeDiff { get; set; }
-        public short Direction { get; set; }
 
-        public double TimeDiffSeconds => TimeDiff.TotalSeconds;
+        public TimeSpan TimeDiff { get; set; }
+        public short TimeDiffDirection { get; set; }
+        public double TimeDiffSeconds => TimeDiff.TotalSeconds * TimeDiffDirection;
     }
 }

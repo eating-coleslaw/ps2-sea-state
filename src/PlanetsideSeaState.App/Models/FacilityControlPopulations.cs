@@ -1,4 +1,6 @@
 ﻿using PlanetsideSeaState.Data.Models.Events;
+using PlanetsideSeaState.Data.Models.QueryResults;
+using PlanetsideSeaState.Shared.Constants;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,39 +28,22 @@ namespace PlanetsideSeaState.App.Models
         public FactionTeamCounts TeamPlayers {get; set; }
         public FactionTeamCounts NsoTeamPlayers { get; set; }
 
-        public int TotalPlayers { get; set; }
-        public Dictionary<string, int> FactionPlayers { get; set; } = new()
-        {
-            { "VS", 0 },
-            { "NC", 0 },
-            { "TR", 0 },
-            { "Unknown", 0 }
-        };
-        
-        public int NsoPlayers { get; set; }
-        public Dictionary<string, int> NsoFactionPlayers { get; set; } = new()
-        {
-            { "VS", 0 },
-            { "NC", 0 },
-            { "TR", 0 },
-            { "Unknown", 0 }
-        };
-
-        //public int Vs { get; set; }
-        //public int Nc { get; set; }
-        //public int Tr { get; set; }
-        //public int Uknown { get; set; }
-        //public int Nso { get; set; }
-        //public int Nso_Vs { get; set; }
-        //public int Nso_Nc { get; set; }
-        //public int Nso_Tr { get; set; }
-        //public int Nso_Unknown { get; set; }
-
         public long? ElapsedMilliseconds { get; set; }
         public DateTime SearchBaseStartTime { get; set; }
         public DateTime SearchBaseEndTime { get; set; }
         public int SearchBasePlayerEvents { get; set;}
         public Dictionary<string, int> SearchBasePlayerEventTypes { get; set; } = new();
+        
+
+        public Dictionary<string, HashSet<FacilityControlPopulationPlayer>> TeamPlayerDetails { get; private set; } = new()
+        {
+            { "VS", new() },
+            { "NC", new() },
+            { "TR", new() },
+            { "Unknown", new() }
+        };
+
+        public IDictionary<Guid, int> CloseFacilityControlPlayerCounts { get; set; }
 
         public FacilityControlPopulations()
         {
@@ -78,6 +63,28 @@ namespace PlanetsideSeaState.App.Models
             OldFactionId = facilityControl.OldFactionId;
             NewFactionId = facilityControl.NewFactionId;
             AttributedPlayers = facilityControl.PlayerControls?.Count;
+        }
+
+        public void AddPlayerDetails(FacilityControlPopulationPlayer player)
+        {
+            switch (player.TeamId)
+            {
+                case Faction.VS:
+                    TeamPlayerDetails["VS"].Add(player);
+                    break;
+
+                case Faction.NC:
+                    TeamPlayerDetails["NC"].Add(player);
+                    break;
+
+                case Faction.TR:
+                    TeamPlayerDetails["TR"].Add(player);
+                    break;
+
+                default:
+                    TeamPlayerDetails["Unknown"].Add(player);
+                    break;
+            };
         }
     }
 }
